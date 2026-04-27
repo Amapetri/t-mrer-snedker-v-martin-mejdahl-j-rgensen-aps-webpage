@@ -24,4 +24,94 @@ Authoritative manifest of every image the site needs. One row per image. Written
 
 ## Requests
 
-*(No image requests yet. The web-designer writes rows here during Step 6 page builds. To seed manually, copy the schema from `.claude-plugin/skills/media-prompting/SKILL.md`.)*
+These rows represent client-required photography. All images must be authentic — no stock, no AI-generated human figures. P3 Process Documentary: show work in progress, not posed results.
+
+---
+
+### IMG-om-os-portrait-001
+
+- **ID:** IMG-om-os-portrait-001
+- **Status:** pending
+- **Page:** /om-os
+- **Section:** portrait
+- **Priority:** Critical — highest ROI asset on the site
+- **Description:** Professional or clear photo of Martin Mejdahl Jørgensen. A portrait on a job site, in a workshop, or any authentic work context. This is the single most important trust asset for a named sole-trader business.
+- **Target slot path:** `public/images/team/martin-mejdahl.jpg` (or .webp)
+- **Dimensions:** Minimum 800×1000px (portrait orientation, 4:5 aspect). Will render at ~400px wide in 5fr column.
+- **Rights / privacy note:** Martin's own photo — client must supply and confirm consent for web use.
+- **Notes:** Site cannot fully function without this. About page portrait slot is first-class (sticky 5-col column on desktop). Placeholder is a styled bone/stone box with amber "NEEDS CONTENT" corner tag.
+
+---
+
+### IMG-services-total-renovering-hero-001
+
+- **ID:** IMG-services-total-renovering-hero-001
+- **Status:** pending
+- **Page:** /ydelser/total-renovering
+- **Section:** hero
+- **Priority:** High
+- **Description:** Photo of a total renovation project in progress — walls opened, structural work visible, or rooms in mid-construction state. Before/after is ideal. Must be an authentic project, not staged.
+- **Target slot path:** `public/images/services/total-renovering-hero.jpg`
+- **Dimensions:** Minimum 1200×800px (landscape). Will render at ~840px wide in 5fr column at 1440px viewport.
+- **Rights / privacy note:** Client owns or must obtain permission for any client-site photography.
+- **Notes:** 5/7 hero (placeholder left, text right). Any authentic renovation-in-progress photo from a real project will work.
+
+---
+
+### IMG-services-vinduer-hero-001
+
+- **ID:** IMG-services-vinduer-hero-001
+- **Status:** pending
+- **Page:** /ydelser/vinduer-doere
+- **Section:** hero
+- **Priority:** High
+- **Description:** Photo of window or door installation in progress — old frame being removed, new frame being fitted, or tools in use. Must show the work happening, not a finished installed window.
+- **Target slot path:** `public/images/services/vinduer-doere-hero.jpg`
+- **Dimensions:** Minimum 1200×800px (landscape).
+- **Rights / privacy note:** Client owns or must obtain permission.
+- **Notes:** 6/6 hero with vertical offset — image bottom-anchored in right column.
+
+---
+
+### IMG-services-isolering-hero-001
+
+- **ID:** IMG-services-isolering-hero-001
+- **Status:** pending
+- **Page:** /ydelser/isolering-lofter
+- **Section:** hero
+- **Priority:** Medium
+- **Description:** Photo of loft/roof insulation being installed — insulation boards being laid, timber structure visible with insulation between joists, work in progress. Must show the actual installation, not just a finished ceiling.
+- **Target slot path:** `public/images/services/isolering-lofter-hero.jpg`
+- **Dimensions:** Minimum 600×800px (portrait or landscape — will be cropped to 4-col narrow accent column).
+- **Rights / privacy note:** Client owns or must obtain permission.
+- **Notes:** 8/4 text-dominant hero — image is in the narrow 4-col accent column right.
+
+---
+
+### IMG-services-garager-hero-001
+
+- **ID:** IMG-services-garager-hero-001
+- **Status:** pending
+- **Page:** /ydelser/garager-carporte
+- **Section:** hero
+- **Priority:** Medium
+- **Description:** Photo of garage or carport construction in progress — timber frame going up, roof structure being built, or cladding being applied. Must show the construction phase, not a finished painted garage.
+- **Target slot path:** `public/images/services/garager-carporte-hero.jpg`
+- **Dimensions:** Minimum 1200×800px (landscape).
+- **Rights / privacy note:** Client owns or must obtain permission.
+- **Notes:** 7/5 hero on dark surface (`--color-surface-dark`). Image in 5fr right column.
+
+---
+
+### IMG-services-skure-hero-001
+
+- **ID:** IMG-services-skure-hero-001
+- **Status:** pending
+- **Page:** /ydelser/skure
+- **Section:** hero
+- **Priority:** Low
+- **Description:** Photo of a shed or outbuilding construction — frame structure, cladding being applied, or any authentic construction phase. Must not be a catalog/stock shed photo.
+- **Target slot path:** `public/images/services/skure-hero.jpg`
+- **Dimensions:** Minimum 600×800px (portrait — will render in narrow 4-col left column).
+- **Rights / privacy note:** Client owns or must obtain permission.
+- **Notes:** 4/8 hero — image narrow left column (4fr) with hairline right border, text wide right column (8fr).

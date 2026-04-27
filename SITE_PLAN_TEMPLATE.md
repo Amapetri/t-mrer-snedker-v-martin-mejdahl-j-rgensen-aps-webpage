@@ -1,12 +1,9 @@
 # Tømrer & Snedker v/ Martin Mejdahl Jørgensen ApS Website — Site Plan
 
-> **Brand DNA**: "{{TAGLINE}}"
-> **Positioning**: {{ONE_LINE_POSITIONING}}
-> **Stack**: Next.js 16 (App Router), TypeScript, Tailwind CSS v4, multilingual (da)
-> **Domain**: {{DOMAIN}}
-
-<!-- This plan is filled by the site-planner agent during Step 3 of the /redesign pipeline.
-     It becomes the architectural blueprint for the entire build. -->
+> **Brand DNA**: "Erfaren tømrer & snedker med Byg Garanti — fra Holstebro"
+> **Positioning**: Named sole-trader business combining structural and finish carpentry with third-party Byg Garanti certification — personal accountability backed by a real guarantee
+> **Stack**: Next.js 16 (App Router), TypeScript, Tailwind CSS v4, Danish (da)
+> **Domain**: mejdahltoemrer.dk
 
 ---
 
@@ -30,87 +27,236 @@
 These principles override all other decisions. When in doubt, refer back here.
 
 ### Fewer, deeper pages over many thin ones
-Strong pages with real depth outrank many shallow pages. Every page must justify its existence with unique search intent and substantial content.
+Strong pages with real depth outrank many shallow pages. Every page must justify its existence with unique search intent and substantial content. The old site had 3 pages — this rebuild gives each service and case study room to breathe and rank.
 
 ### Structure for the buyer, not the org chart
-Pages map to how prospects evaluate a supplier, not to internal departments.
+Pages map to how a Danish homeowner evaluates a contractor, not to internal categories. The visitor asks: Can they do my job? Are they trustworthy? How do I reach them?
 
 ### Proof over claims
-Every claim needs evidence. Vague superlatives mean nothing. Specific numbers and case studies mean everything.
+Byg Garanti certification is the strongest asset on this site. It is not a vague promise — it is a formal, verifiable warranty scheme. Every page should reference concrete evidence: the warranty, the CVR number, the real project photos, the Dansk Byggeri membership. Never write "høj kvalitet" without supporting proof.
 
 ### Don't launch what you can't fill
-An empty blog looks worse than no blog. Launch only what has real content behind it.
+No blog is launched until there is content for it. No news section until articles are ready. The cases section launches with three documented cases — the 2015 projects with real photography are better than empty newer placeholders.
 
 ### The homepage is a routing device
-Its job is to answer three questions in 30 seconds: What do you do? Are you credible? How do I engage?
+Its job is to answer three questions in 30 seconds: Who is Martin and why should I trust him? What does this firm do? How do I get a quote? Everything else is secondary.
+
+### Tone: direct, named, warm
+Martin Mejdahl Jørgensen is in the company name. The site speaks as "vi" in most copy but references Martin directly in the About section and wherever personal accountability is the differentiator. Address the visitor as "du" throughout — standard Danish B2C register.
 
 ---
 
 ## 2. Site Architecture
 
 ```
-{{DOMAIN}}
-├── /[locale]/                          ← Homepage
-├── /[locale]/services/                 ← Services hub
-│   └── /services/[slug]               ← Individual services
-├── /[locale]/cases/                    ← Case Studies
-│   └── /cases/[slug]                  ← Individual case study
-├── /[locale]/about/                    ← Company story
-├── /[locale]/contact/                  ← Contact + inquiry form
-├── /[locale]/privacy/                  ← Privacy Policy
-├── /[locale]/cookies/                  ← Cookie Policy
-├── /sitemap.xml                        ← Auto-generated
-└── /robots.txt                         ← Auto-generated
+mejdahltoemrer.dk/
+├── /                                        ← Homepage
+├── /ydelser/                                ← Services hub (all 8 services)
+│   ├── /ydelser/tag-renovering/             ← Tag-renovering
+│   ├── /ydelser/total-renovering/           ← Total renovering
+│   ├── /ydelser/vinduer-og-doere/           ← Vinduer & Døre
+│   ├── /ydelser/isolering-og-lofter/        ← Isolering & Lofter
+│   ├── /ydelser/tilbygninger/               ← Tilbygninger
+│   ├── /ydelser/garager-og-carporte/        ← Garager & Carporte
+│   ├── /ydelser/skure/                      ← Skure
+│   └── /ydelser/fugtskade-sanering/         ← Fugtskade Sanering (skimmelsvamp)
+├── /projekter/                              ← Cases hub
+│   ├── /projekter/parcelhus-holstebro/      ← Case: ny parcelhus Holstebro
+│   ├── /projekter/tilbygning-halgaard/      ← Case: tilbygning Halgård
+│   └── /projekter/fugtskade-koebenhavn/     ← Case: fugtskade/skimmelsvamp København
+├── /om-os/                                  ← About Martin + certifications
+├── /kontakt/                                ← Contact + inquiry form
+├── /privatlivspolitik/                      ← Privacy Policy (GDPR)
+├── /cookies/                                ← Cookie Policy
+├── /sitemap.xml                             ← Auto-generated by Next.js
+└── /robots.txt                              ← Auto-generated by Next.js
 ```
 
-<!-- Add or remove routes as needed for this company -->
+**URL slug decisions:**
+- Danish slugs throughout — no English URL segments
+- `/ydelser/` instead of `/services/` — matches Danish search intent
+- `/projekter/` instead of `/cases/` — "projekter" is the natural Danish word; also maps to "projekter tømrer" search queries
+- `/om-os/` instead of `/about/` — standard Danish convention
+- `/kontakt/` instead of `/contact/` — standard Danish convention
+- `vinduer-og-doere` — "ø" romanised as "oe" for URL safety; same pattern for `fugtskade-koebenhavn`
 
 ---
 
 ## 3. Page Inventory
 
-| Page | Priority | Status | Primary Keyword |
-|------|----------|--------|-----------------|
-| Homepage | P0 | TODO | |
-| Services hub | P0 | TODO | |
-| Service: ... | P0 | TODO | |
-| Cases listing | P1 | TODO | |
-| About | P1 | TODO | |
-| Contact | P0 | TODO | |
+### Core pages (Phase 0–1)
+
+| Page | URL | Priority | Build Phase | Primary Keyword | Secondary Keywords | Main CTA | Content Status |
+|------|-----|----------|-------------|-----------------|-------------------|----------|----------------|
+| Homepage | `/` | P0 | Phase 1 | tømrer Holstebro | tømrer snedker Holstebro, byg garanti tømrer | Få et gratis tilbud | Can draft |
+| Services hub | `/ydelser/` | P0 | Phase 1 | tømrer ydelser Holstebro | tømrer og snedker, håndværker Holstebro | Se alle ydelser / Kontakt os | Can draft |
+| Tag-renovering | `/ydelser/tag-renovering/` | P0 | Phase 1 | tagrenovering tømrer | tag renovering Holstebro, tagrenovering pris | Få tilbud på tag-renovering | Can draft |
+| Tilbygninger | `/ydelser/tilbygninger/` | P0 | Phase 1 | tilbygning tømrer Holstebro | tilbygning pris tømrer, bygge tilbygning | Få tilbud på tilbygning | Can draft |
+| Contact | `/kontakt/` | P0 | Phase 1 | tømrer tilbud Holstebro | gratis tilbud tømrer, kontakt tømrer | Ring eller skriv nu | Can draft |
+
+### Service detail pages (Phase 1–2)
+
+| Page | URL | Priority | Build Phase | Primary Keyword | Secondary Keywords | Main CTA | Content Status |
+|------|-----|----------|-------------|-----------------|-------------------|----------|----------------|
+| Total renovering | `/ydelser/total-renovering/` | P1 | Phase 1 | total renovering tømrer | hus renovering Holstebro, renovering snedker | Få tilbud på renovering | Can draft |
+| Vinduer & Døre | `/ydelser/vinduer-og-doere/` | P1 | Phase 2 | vinduer og døre udskiftning tømrer | vinduer skift Holstebro, nye vinduer tømrer | Få tilbud på vinduer og døre | Can draft |
+| Isolering & Lofter | `/ydelser/isolering-og-lofter/` | P1 | Phase 2 | isolering loft tømrer | loft isolering Holstebro, tagrum isolering | Få tilbud på isolering | Can draft |
+| Garager & Carporte | `/ydelser/garager-og-carporte/` | P1 | Phase 2 | garage bygge tømrer | carport tømrer Holstebro, ny garage pris | Få tilbud på garage/carport | Can draft |
+| Skure | `/ydelser/skure/` | P2 | Phase 2 | skur bygge tømrer | skur Holstebro, redskabsskur tømrer | Få tilbud på skur | Can draft |
+| Fugtskade Sanering | `/ydelser/fugtskade-sanering/` | P0 | Phase 2 | fugtskade sanering tømrer | skimmelsvamp renovering, fugtskade udbedring | Kontakt os akut | Can draft |
+
+### Cases (Phase 2)
+
+| Page | URL | Priority | Build Phase | Primary Keyword | Secondary Keywords | Main CTA | Content Status |
+|------|-----|----------|-------------|-----------------|-------------------|----------|----------------|
+| Cases hub | `/projekter/` | P1 | Phase 2 | tømrer projekter Holstebro | tømrer arbejde cases, tømrer referencer | Se vores projekter | Can draft |
+| Parcelhus Holstebro | `/projekter/parcelhus-holstebro/` | P1 | Phase 2 | tømrer parcelhus Holstebro | nybyggeri tømrer Holstebro | Har du et lignende projekt? | Can draft (6 photos available) |
+| Tilbygning Halgård | `/projekter/tilbygning-halgaard/` | P1 | Phase 2 | tilbygning tømrer Halgård | tilbygning Holstebro tømrer | Har du et lignende projekt? | Can draft (6 photos available) |
+| Fugtskade København | `/projekter/fugtskade-koebenhavn/` | P1 | Phase 2 | skimmelsvamp tømrer København | fugtskade sanering København | Har du et lignende projekt? | Can draft (3 photos available) |
+
+### Trust & company (Phase 2)
+
+| Page | URL | Priority | Build Phase | Primary Keyword | Secondary Keywords | Main CTA | Content Status |
+|------|-----|----------|-------------|-----------------|-------------------|----------|----------------|
+| Om os | `/om-os/` | P1 | Phase 2 | tømrer Martin Mejdahl Holstebro | byg garanti tømrer, dansk byggeri tømrer | Kontakt Martin | Partial — needs client input (headshot, founding year, personal bio) |
+
+### Legal (Phase 3)
+
+| Page | URL | Priority | Build Phase | Primary Keyword | Secondary Keywords | Main CTA | Content Status |
+|------|-----|----------|-------------|-----------------|-------------------|----------|----------------|
+| Privatlivspolitik | `/privatlivspolitik/` | P2 | Phase 3 | — | — | — | Can draft (GDPR boilerplate + company specifics) |
+| Cookie-politik | `/cookies/` | P2 | Phase 3 | — | — | — | Can draft (GDPR boilerplate + cookie categories) |
+
+### Shared components (Phase 0)
+
+| Component | Notes | Content Status |
+|-----------|-------|----------------|
+| Header | Logo, nav links (Ydelser, Projekter, Om os, Kontakt), mobile hamburger | Can build |
+| Footer | Address, phone, email, CVR, Byg Garanti logo, Dansk Byggeri logo, privacy/cookie links | Can build |
+| Breadcrumbs | All non-homepage routes get breadcrumbs | Can build |
+| CTA Block | Reusable "Få et gratis tilbud" block with phone + email + form link | Can build |
+| Cookie Consent Banner | GDPR-compliant; blocks analytics until accepted | Can build |
 
 ---
 
 ## 4. Buying Journey Mapping
 
-| Stage | Visitor Intent | Target Pages | Key Content |
-|-------|---------------|--------------|-------------|
-| Awareness | "What is [service]?" | Homepage, educational pages | Problem education, capabilities overview |
-| Consideration | "Who can do [service]?" | Services, Cases | Technical depth, proof of capability |
-| Decision | "Should I choose [company]?" | Cases, About, Contact | Evidence, credibility, easy next step |
+| Stage | Visitor Intent | Emotion | Target Pages | Key Content Elements |
+|-------|---------------|---------|--------------|---------------------|
+| **Awareness** | "I need a carpenter in Holstebro / I have a mold problem" | Uncertain, searching | Homepage, service detail pages | Clear service names matching search terms; Holstebro + Midtjylland location signals; nationwide reach statement |
+| **Consideration** | "Can this firm do my specific job?" | Evaluating, cautious | Services hub, individual service pages, Cases hub | Service scope descriptions; case study photography; Byg Garanti warranty explanation; dual tømrer+snedker capability |
+| **Verification** | "Is this firm legitimate?" | Sceptical — has been let down before | About page, any Byg Garanti/Dansk Byggeri mentions, Contact page | CVR number; Byg Garanti badge + explanation; Dansk Byggeri membership; Martin's name and photo; real project photography (not stock) |
+| **Decision** | "I'm ready to call / send an enquiry" | Motivated but needs low-friction action | Contact page, CTA blocks on all pages | Direct phone number and email; short enquiry form; "gratis tilbud" framing; reassurance on response time |
+| **Advocacy** | "I want to recommend this firm" | Satisfied, helpful | Cases page | Real project results; social share / easy URL to send |
 
 ---
 
 ## 5. Topic Cluster Strategy
 
-<!-- Define keyword clusters and which pages target them -->
+### Cluster 1 — Local hire (primary commercial cluster)
 
-| Cluster | Keywords | Hub Page | Supporting Pages |
-|---------|----------|----------|-----------------|
-| Core service | | Services hub | Service detail pages |
-| Technical | | Educational page | |
-| Geographic | | Homepage, About | |
+**Hub page:** Homepage (`/`)
+**Intent:** Homeowner actively searching for a carpenter in Holstebro or Midtjylland
+
+| Keyword | Monthly intent | Supporting page |
+|---------|---------------|-----------------|
+| tømrer Holstebro | High | Homepage |
+| tømrer Midtjylland | High | Homepage |
+| tømrer snedker Holstebro | High | Homepage |
+| håndværker Holstebro | Medium | Homepage |
+| tømrer Herning | Medium | Homepage (mention in copy) |
+| tømrer Struer | Medium | Homepage (mention in copy) |
+| tømrer Ringkøbing | Low-medium | Homepage (mention in copy) |
+| tømrer hele landet | Medium | Homepage + About |
+
+### Cluster 2 — Service-specific intent
+
+**Hub page:** `/ydelser/`
+**Intent:** Homeowner searching for a specific type of carpentry work
+
+| Keyword | Target page | Priority |
+|---------|------------|---------|
+| tagrenovering tømrer | `/ydelser/tag-renovering/` | P0 |
+| tag renovering Holstebro | `/ydelser/tag-renovering/` | P0 |
+| tilbygning tømrer Holstebro | `/ydelser/tilbygninger/` | P0 |
+| tilbygning pris tømrer | `/ydelser/tilbygninger/` | P1 |
+| vinduer og døre udskiftning tømrer | `/ydelser/vinduer-og-doere/` | P1 |
+| isolering loft tømrer | `/ydelser/isolering-og-lofter/` | P1 |
+| garage bygge tømrer | `/ydelser/garager-og-carporte/` | P1 |
+| carport tømrer Holstebro | `/ydelser/garager-og-carporte/` | P1 |
+| fugtskade sanering tømrer | `/ydelser/fugtskade-sanering/` | P0 |
+| skimmelsvamp renovering | `/ydelser/fugtskade-sanering/` | P0 |
+| skur bygge tømrer | `/ydelser/skure/` | P2 |
+| total renovering tømrer | `/ydelser/total-renovering/` | P1 |
+
+### Cluster 3 — Trust and certification
+
+**Hub page:** `/om-os/`
+**Intent:** Homeowner who already knows the firm and is doing background verification, or actively searching for a guaranteed contractor
+
+| Keyword | Target page | Priority |
+|---------|------------|---------|
+| byg garanti tømrer | `/om-os/` + Homepage | P1 |
+| tømrer med garanti renovering | `/om-os/` + service pages | P1 |
+| dansk byggeri tømrer Holstebro | `/om-os/` | P1 |
+| tømrer certifikat garanti | `/om-os/` | P2 |
+
+### Cluster 4 — Nationwide / project-specific
+
+**Hub page:** `/projekter/`
+**Intent:** Homeowner searching for proof of a specific project type, or a non-local homeowner seeking a nationwide contractor
+
+| Keyword | Target page | Priority |
+|---------|------------|---------|
+| tømrer parcelhus Holstebro | `/projekter/parcelhus-holstebro/` | P1 |
+| tilbygning tømrer referencer | `/projekter/tilbygning-halgaard/` | P1 |
+| skimmelsvamp tømrer København | `/projekter/fugtskade-koebenhavn/` | P1 |
+| tømrer København renovering | `/projekter/fugtskade-koebenhavn/` | P2 |
 
 ---
 
 ## 6. Internal Linking Strategy
 
-<!-- Define how pages link to each other -->
+### Homepage → everywhere
+- Hero section links to `/kontakt/` (primary CTA: "Få et gratis tilbud")
+- Service tiles: each of the 8 tiles links to its `/ydelser/[slug]/` page
+- Featured case(s) link to `/projekter/` hub and individual case detail
+- "Om os" trust section links to `/om-os/`
+- Byg Garanti panel links to `/om-os/` (anchor: certifications section)
 
-- Homepage → all major sections
-- Service hub → all service detail pages
-- Service detail → related services, relevant cases, contact
-- Case studies → services used, contact
-- About → cases, contact
+### Services hub `/ydelser/` → service details
+- Each service card links to its detail page
+- Hub page footer CTA links to `/kontakt/`
+
+### Service detail pages → related content
+- Each service detail page links to:
+  - Relevant case study where one exists (e.g., tag-renovering → parcelhus Holstebro case if applicable; tilbygninger → tilbygning Halgård; fugtskade sanering → fugtskade København)
+  - 2–3 related services (sidebar or bottom section)
+  - `/kontakt/` as primary CTA
+  - `/om-os/` for Byg Garanti credibility link
+
+### Cases hub `/projekter/` → case details
+- Each case card links to its detail page
+- Hub page links to `/kontakt/` and `/ydelser/`
+
+### Case detail pages → actions
+- Each case detail page links to:
+  - The primary service(s) used in that project (e.g., fugtskade case → `/ydelser/fugtskade-sanering/`)
+  - `/kontakt/` with a contextual CTA: "Har du et lignende projekt? Kontakt os."
+  - `/projekter/` (back to all cases)
+
+### About `/om-os/` → trust actions
+- Links to `/projekter/` (see our work)
+- Links to `/kontakt/` (contact Martin)
+- Links to `/ydelser/` (what we offer)
+- Byg Garanti logo links to byggaranti.dk (external, rel="noopener noreferrer")
+- Dansk Byggeri logo links to danskbyggeri.dk (external, rel="noopener noreferrer")
+
+### Contact `/kontakt/` → no dead ends
+- Contact page links back to `/ydelser/` and `/projekter/` for visitors not yet ready to enquire
+
+### Footer (global) → all main sections
+Footer contains: Ydelser, Projekter, Om os, Kontakt, Privatlivspolitik, Cookie-politik
 
 ---
 
@@ -118,11 +264,21 @@ Its job is to answer three questions in 30 seconds: What do you do? Are you cred
 
 | Page | Schema Types | Key Properties |
 |------|-------------|----------------|
-| Homepage | Organization + LocalBusiness | name, address, foundingDate |
-| Service pages | Service | name, description, provider |
-| Case studies | Article | headline, datePublished |
-| About | Organization | history, certifications |
-| Contact | ContactPage + LocalBusiness | telephone, email, address |
+| Homepage | `Organization` + `LocalBusiness` + `HomeAndConstructionBusiness` | `name`, `legalName` (Tømrer & Snedker v/ Martin Mejdahl Jørgensen ApS), `url`, `telephone`, `email`, `address` (Tingagerparken 3, Mejdal/Halgård, 7500 Holstebro), `taxID` (CVR 36466588), `areaServed` (["Holstebro", "Midtjylland", "Denmark"]), `hasCredential` (Byg Garanti), `memberOf` (Dansk Byggeri), `logo` |
+| Services hub | `Service` + `BreadcrumbList` | `name` ("Vores ydelser"), `provider` (links to Organization), `areaServed` |
+| Service detail pages | `Service` + `BreadcrumbList` | `name` (service name in Danish), `description`, `provider` (Organization), `areaServed`, `url` |
+| Cases hub | `ItemList` + `BreadcrumbList` | `itemListElement` (array of case study links) |
+| Case detail pages | `Article` + `BreadcrumbList` | `headline` (case title), `description`, `image` (project photos), `datePublished`, `author` (Organization), `about` (linked Service) |
+| About `/om-os/` | `Organization` + `Person` | Organization: `foundingDate` [NEEDS: founding year from client], `description`, `hasCredential` (Byg Garanti), `memberOf` (Dansk Byggeri); Person: `name` (Martin Mejdahl Jørgensen), `jobTitle` ("Tømrermester"), `worksFor` (Organization), `image` [NEEDS: headshot] |
+| Contact `/kontakt/` | `ContactPage` + `LocalBusiness` | `telephone`, `email`, `address`, `openingHours` [NEEDS: business hours from client], `taxID` |
+| Privacy Policy | `WebPage` | `name`, `url`, `dateModified` |
+| Cookie Policy | `WebPage` | `name`, `url`, `dateModified` |
+
+**Implementation notes:**
+- All structured data as JSON-LD in `<script type="application/ld+json">` within each page's `<head>`
+- LocalBusiness schema on Homepage and Contact page must share identical NAP data (Name, Address, Phone) — exact string match required for local SEO consistency
+- `areaServed` on Organization should include both `"Holstebro"` and `"Denmark"` to reflect the nationwide-from-Holstebro positioning
+- `hasCredential` for Byg Garanti: use `"https://www.byggaranti.dk"` as the `url` property to create a verifiable link
 
 ---
 
@@ -131,55 +287,95 @@ Its job is to answer three questions in 30 seconds: What do you do? Are you cred
 These are non-negotiable for every site. Check each item during the build and verify before publish.
 
 ### Functionality
-- [ ] **Contact form submits** — Server Action or API route handles form data (email delivery or CRM integration). Form shows success/error states. Never ship a form that renders but does nothing.
-- [ ] **Cookie consent enforces preferences** — Banner is not just cosmetic. Analytics/marketing scripts are blocked until the user consents. Consent state persists across sessions. Verify by checking that no tracking scripts load before acceptance.
+- [ ] **Contact form submits** — Server Action handles form data; sends email to Martin (address confirmed from old site). Form shows success state ("Vi vender tilbage hurtigst muligt") and error state. Never ship a form that renders but does nothing.
+- [ ] **Cookie consent enforces preferences** — Banner is not cosmetic. Vercel Analytics is blocked until the user consents. Consent state persists across sessions via a cookie. Verify by checking that no tracking scripts fire before acceptance.
 
 ### Security
-- [ ] **Security headers configured** — `next.config.ts` includes `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, and `Permissions-Policy` headers.
-- [ ] **Error boundaries exist** — `error.tsx` (runtime errors), `not-found.tsx` (404s), and `loading.tsx` (suspense) files exist in `src/app/[locale]/`. Users never see the raw Next.js error page.
+- [ ] **Security headers configured** — `next.config.ts` includes `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy` headers.
+- [ ] **Error boundaries exist** — `error.tsx` (runtime errors), `not-found.tsx` (404s), and `loading.tsx` (suspense) files exist in `src/app/`. Users never see the raw Next.js error page.
 
 ### Accessibility (WCAG 2.1 AA)
-- [ ] **Keyboard navigation on all interactive elements** — Dropdowns, menus, modals, and accordions are fully operable with keyboard (Enter, Space, Escape, Arrow keys). No mouse-only interactions.
-- [ ] **Visible focus indicators** — Custom `focus-visible` styles on all interactive elements. Never rely solely on browser defaults. Focus styles should match the brand's design system.
+- [ ] **Keyboard navigation on all interactive elements** — Mobile menu, service accordions (if used), and the enquiry form are fully operable with keyboard (Enter, Space, Escape, Arrow keys). No mouse-only interactions.
+- [ ] **Visible focus indicators** — Custom `focus-visible` styles on all interactive elements matching the site's design system. Never rely solely on browser defaults.
+- [ ] **Images have meaningful alt text** — All project photos have descriptive alt text in Danish (e.g., `"Ny parcelhus under opførelse i Holstebro — tømrerarbejde"`). Decorative images use `alt=""`.
 
 ### Localization
-- [ ] **Legal pages fully translated** — Privacy policy and cookie policy content exists in all configured locales, not just the primary language. Required for GDPR compliance.
-- [ ] **All UI strings translated** — Breadcrumb labels (including "Home"), button text, form labels, error messages, and navigation items come from `next-intl` translation files. No hardcoded English strings in components.
+- [ ] **Single locale (da) — all UI strings in Danish** — No hardcoded English strings in components. All button labels, form placeholders, error messages, nav items, and breadcrumb labels come from `messages/da.json` via `next-intl`.
+- [ ] **Legal pages in Danish** — Privacy policy and cookie policy are in Danish. Required for GDPR compliance with Danish visitors.
+
+### SEO
+- [ ] **Every page has a unique `<title>` and `<meta name="description">`** — Titles follow the pattern: `[Service/Page name] | Tømrer Holstebro — Martin Mejdahl Jørgensen`. Descriptions are 140–160 characters and include the primary keyword.
+- [ ] **`/sitemap.xml` is generated and includes all indexable pages** — Legal pages may be `noindex` if preferred.
+- [ ] **`/robots.txt` is present** — Does not block any production content.
 
 ---
 
 ## 9. Build Phases
 
-### Phase 1 — Foundation
-- [ ] Homepage
-- [ ] Services hub + service detail pages
-- [ ] Contact page
-- [ ] Header + Footer
-- [ ] SEO foundation (sitemap, robots, schema)
+### Phase 0 — Shared components (build first, before any pages)
+These are required by every page. Build and test them before starting Phase 1.
+- [ ] **Header** — Logo (text fallback until logo asset confirmed), navigation links (Ydelser, Projekter, Om os, Kontakt), mobile hamburger menu with keyboard accessibility
+- [ ] **Footer** — Address (Tingagerparken 3, 7500 Holstebro), phone, email, CVR (3646 6588), Byg Garanti logo, Dansk Byggeri logo, legal links (Privatlivspolitik, Cookie-politik)
+- [ ] **Breadcrumbs** — Shown on all non-homepage routes; uses `next-intl` for labels; generates `BreadcrumbList` JSON-LD
+- [ ] **CTA Block** — Reusable component: heading ("Få et gratis tilbud"), subtext, phone number, email link, optional enquiry form link. Used on every service page and case study.
+- [ ] **Cookie Consent Banner** — GDPR-compliant; blocks Vercel Analytics until consent is granted; dismissible; persists choice; links to `/cookies/`
+
+### Phase 1 — Core (launch-critical pages)
+The site is not launchable without these. Build in this order.
+
+- [ ] **Homepage** (`/`) — Hero with primary CTA, 8 service tiles, Byg Garanti trust panel, featured case(s) preview, Dansk Byggeri membership signal, contact CTA block. Primary keyword: tømrer Holstebro.
+- [ ] **Services hub** (`/ydelser/`) — Grid of 8 service cards with icon/illustration, short description, and link to detail page. Primary keyword: tømrer ydelser Holstebro.
+- [ ] **Tag-renovering** (`/ydelser/tag-renovering/`) — Full service detail page. Primary keyword: tagrenovering tømrer Holstebro. Link to relevant case.
+- [ ] **Tilbygninger** (`/ydelser/tilbygninger/`) — Full service detail page. Primary keyword: tilbygning tømrer Holstebro. Link to tilbygning Halgård case.
+- [ ] **Total renovering** (`/ydelser/total-renovering/`) — Full service detail page. Primary keyword: total renovering tømrer.
+- [ ] **Contact page** (`/kontakt/`) — Direct contact (phone + email), enquiry form (Server Action), address with map embed, CVR, [NEEDS: business hours]. Primary keyword: tømrer tilbud Holstebro.
+- [ ] **404 page** (`not-found.tsx`) — Custom page in Danish with navigation back to homepage.
+- [ ] **SEO foundation** — `sitemap.xml`, `robots.txt`, Open Graph meta tags on all Phase 1 pages, `LocalBusiness` JSON-LD on Homepage.
 
 ### Phase 2 — Trust & Evidence
-- [ ] Case studies
-- [ ] About page
-- [ ] Cookie consent + legal pages
+Builds credibility and depth. Required before a serious marketing push.
 
-### Phase 3 — Growth (when content exists)
-- [ ] Blog / News section
-- [ ] Jobs page
-- [ ] Additional educational content
+- [ ] **Vinduer & Døre** (`/ydelser/vinduer-og-doere/`) — Service detail page.
+- [ ] **Isolering & Lofter** (`/ydelser/isolering-og-lofter/`) — Service detail page.
+- [ ] **Garager & Carporte** (`/ydelser/garager-og-carporte/`) — Service detail page.
+- [ ] **Skure** (`/ydelser/skure/`) — Service detail page.
+- [ ] **Fugtskade Sanering** (`/ydelser/fugtskade-sanering/`) — Service detail page. Highest urgency keyword (skimmelsvamp); links directly to CPH case.
+- [ ] **Cases hub** (`/projekter/`) — 3-card grid with project photo, title, and category tag.
+- [ ] **Parcelhus Holstebro case** (`/projekter/parcelhus-holstebro/`) — Full case detail: challenge, scope, photos (6 available), CTA.
+- [ ] **Tilbygning Halgård case** (`/projekter/tilbygning-halgaard/`) — Full case detail: challenge, scope, photos (6 available), CTA.
+- [ ] **Fugtskade København case** (`/projekter/fugtskade-koebenhavn/`) — Full case detail: before/during/after narrative, photos (3 available), CTA.
+- [ ] **About page** (`/om-os/`) — Company story, Martin's background [NEEDS: founding year + personal bio + headshot], Byg Garanti explained, Dansk Byggeri explained, CVR displayed. Remaining sections draftable from brand context.
+- [ ] **JSON-LD for all Phase 2 pages** — Service schema on service pages; Article schema on case studies; Person + Organization schema on About.
+
+### Phase 3 — Legal (required before any paid marketing or cookie analytics)
+- [ ] **Privatlivspolitik** (`/privatlivspolitik/`) — GDPR privacy policy in Danish: data controller (Tømrer & Snedker v/ Martin Mejdahl Jørgensen ApS, CVR 36466588, Tingagerparken 3, 7500 Holstebro), data collected (contact form, analytics), retention periods, user rights.
+- [ ] **Cookie-politik** (`/cookies/`) — Danish cookie policy: categories (necessary, analytics via Vercel Analytics), opt-out mechanism, consent management description.
+- [ ] **Cookie consent enforcement audit** — Verify that Vercel Analytics does not fire before cookie consent is granted. Check via browser dev tools in production.
 
 ---
 
 ## 10. Content Requirements from Client
 
-<!-- Track what content you need from the company owner -->
+The following content cannot be drafted from available brand context and must come from Martin / the company owner. These are blockers for the pages noted.
 
-| Content Needed | Status | Notes |
-|---------------|--------|-------|
-| Company story / history | | |
-| Team photos + names | | |
-| Service descriptions | | |
-| Case study data (challenge/solution/results) | | |
-| Client logos (with permission) | | |
-| Facility / product photos | | |
-| Contact details (address, phone, email) | | |
-| Certifications | | |
+| Content Needed | Blocks | Priority | Status | Notes |
+|---------------|--------|----------|--------|-------|
+| **Martin's headshot photo** | About page (`/om-os/`) | Critical | Needs client | Single highest-trust gap for a named-person business. A recent, professional-quality photo of Martin. Does not need a studio shoot — a clear photo on a job site or in a workshop is authentic and appropriate. |
+| **Founding year** | About page, Homepage trust section | High | Needs client | Old site says "mange års erfaring" — no date given. Needed for the founding story, the `Organization` schema `foundingDate` property, and any "X years of experience" claims. |
+| **Business hours** | Contact page, structured data | High | Needs client | Not stated anywhere on the old site. Required for `openingHours` in LocalBusiness schema and for the contact page. |
+| **Martin's personal background** | About page | High | Needs client | Where did Martin train? What is his carpentry qualification (svend, mester)? How long has he been in the trade? This is the story section of `/om-os/` — can write around it but the page is significantly weaker without it. |
+| **Recent case photography (post-2015)** | Cases hub, Homepage featured case | High | Needs client | All three documented cases are from 2015. Newer project photos would significantly strengthen the site. Even 3–5 good photos from a recent project would allow a 4th case study. |
+| **Employee count and team composition** | About page | Medium | Needs client | Is it Martin solo? Martin + apprentices? A small crew? This affects how the About section is written and whether "vi" means one person or a small team. |
+| **Business hours (response time SLA)** | Contact page | Medium | Needs client | "Vi svarer inden for [X] hverdage" — what is a realistic and accurate response time? |
+| **Customer testimonials (2–3 quotes)** | Homepage social proof section, case studies | Medium | Needs client | No testimonials exist on the old site. Even 2 short first-name quotes from satisfied customers would materially improve conversion on the homepage. |
+| **Additional certifications** | About page, Footer, structured data | Medium | Needs client | Beyond Byg Garanti and Dansk Byggeri — are there KS-certifications, energy renovation approvals, insurance-backed guarantees, or specialist training certificates? |
+| **Social media profiles** | Footer, About page | Low | Needs client | No social links on old site. Does the company have a Facebook page, Instagram, or LinkedIn? If so, links belong in the footer. |
+| **Google Business Profile status** | Local SEO | High | Needs client (action) | If not already claimed and updated, claiming/updating the Google Business Profile is the single highest-ROI local SEO action. Client should add all services, the Holstebro address, business hours, and request that existing customers leave reviews. |
+| **Service photography (one photo per service)** | Service detail pages | High | Needs client | No service-category photography exists. The old site uses general project photos. Ideally one real photo per service type (e.g., a roof being worked on for tag-renovering, a frame going up for tilbygninger). |
+| **Indicative pricing or quote process description** | Service detail pages, Contact page | Low | Needs client | Currently "gratis tilbud" is the CTA. If Martin wants to add any pricing context ("prisen afhænger af..."), that can be included. Not mandatory — many tradespeople intentionally omit pricing from their site. |
+
+**Placeholder convention:** All items above that have no content yet are marked in the codebase using the `[NEEDS: ...]` marker format as specified in CLAUDE.md. These markers are visible in development via the `.placeholder-content` CSS class (dashed amber border, "NEEDS CONTENT" label).
+
+---
+
+*Site plan prepared: 2026-04-27. This document is the architectural blueprint for the full build. All subsequent page builds should reference this plan for URL structure, keyword targets, build phase, and content requirements.*

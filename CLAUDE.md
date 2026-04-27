@@ -9,7 +9,7 @@ Corporate website for **Tømrer & Snedker v/ Martin Mejdahl Jørgensen ApS** —
 - **Old site domain:** https://www.mejdahltoemrer.dk/
 - **New site domain:** {{DOMAIN}}
 
-The site is multilingual (da) and serves as both a marketing site and technical resource for B2B customers.
+The site is in Danish (da) and serves as a marketing site for private homeowners (B2C). The company is Byg Garanti-certified and a member of Dansk Byggeri. CVR: 3646 6588. Address: Tingagerparken 3, Mejdal/Halgård, 7500 Holstebro. Phone: 40 36 88 62. Email: martin@mejdahltoemrer.dk.
 
 ### Key site sections
 - **Services** — core service/product categories

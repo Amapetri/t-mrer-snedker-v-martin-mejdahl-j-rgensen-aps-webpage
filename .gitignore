@@ -46,3 +46,6 @@ SALES_BRIEF.md
 # browser-qa screenshots — regenerated each run, binaries we don't want to track
 # (the rest of .redesign-state/ stays committed for pipeline resumption)
 .redesign-state/screenshots/
+
+# Contact form submissions — lead data, never commit to version control
+.submissions/*.json

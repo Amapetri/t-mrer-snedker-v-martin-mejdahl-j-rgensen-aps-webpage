@@ -3,11 +3,15 @@ import {routing} from './i18n/routing';
 
 export default createMiddleware(routing);
 
-// The 149e9513-... segment is BotID's well-known prefix for the challenge
-// script and proxy paths (set up by withBotId in next.config.ts). Without
-// excluding it here, next-intl prepends the locale, the rewrite no longer
-// matches, c.js 404s, and the form submission server-side defaults to
-// isBot:true (or throws).
+// Exclude any path that starts with a UUID segment. BotID's challenge
+// script and proxy URLs live under a UUID-prefixed path
+// (/149e9513-.../2d206a39-.../...), set up by withBotId in next.config.ts.
+// Without this exclusion next-intl prepends the locale, the BotID rewrite
+// no longer matches, c.js 404s, and the form's checkBotId() defaults to
+// isBot:true (or throws). Matching the UUID *shape* instead of the literal
+// prefix means we survive any future Vercel rotation of the BotID prefix.
 export const config = {
-  matcher: ['/((?!api|_next|images|videos|favicon.ico|149e9513-01fa-4fb0-aad4-566afd725d1b).*)']
+  matcher: [
+    '/((?!api|_next|images|videos|favicon.ico|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}).*)',
+  ],
 };

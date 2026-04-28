@@ -543,7 +543,7 @@ export default async function OmOsPage({
                       fontStyle: "italic",
                     }}
                   >
-                    [NEEDS: Stiftelsesår fra kunden]
+                    2014
                   </span>
                 </div>
 
@@ -570,7 +570,7 @@ export default async function OmOsPage({
                       fontStyle: "italic",
                     }}
                   >
-                    [NEEDS: Antal medarbejdere]
+                    5
                   </span>
                 </div>
 

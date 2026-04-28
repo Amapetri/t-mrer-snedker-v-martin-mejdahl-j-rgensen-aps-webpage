@@ -28,11 +28,11 @@ Essential facts and constraints for designing the website. This skill provides t
 
 - **Name:** Tømrer & Snedker v/ Martin Mejdahl Jørgensen ApS
 - **CVR:** 3646 6588
-- **Founded:** Unknown — ask client
+- **Founded:** 2014
 - **Location:** Tingagerparken 3, Mejdal/Halgård, 7500 Holstebro, Denmark
 - **Service area:** Nationwide ("arbejder hele landet" — operates all of Denmark)
 - **Specialty:** Carpentry and joinery (tømrer & snedker) — residential new-build, renovation, and extensions
-- **Employees:** Unknown — ask client *(site gives no indication; likely a small firm of 1–5 based on scale of cases shown)*
+- **Employees:** 5
 - **Certifications:** Member of Dansk Byggeri; Byg Garanti warranty coverage (3 years visible defects, 10 years latent defects for private residential work)
 - **Markets:** Private homeowners (primary), residential property owners across Denmark
 - **Languages:** Danish (primary); no English version on old site

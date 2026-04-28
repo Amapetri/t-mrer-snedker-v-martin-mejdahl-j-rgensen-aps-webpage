@@ -65,10 +65,11 @@ Agent **colors** (green, cyan, magenta, etc.) appear in the Claude Code terminal
 | 5 | Design Direction + Design System | Procedure in two sub-steps, executed by `web-designer` agent | **Exists** | `design-direction.md` artifact (5.1) + `globals.css` tokens + populated `design-system/SKILL.md` (5.2) |
 | 6 | Build Pages | Agent (`web-designer`, one spawn per page) | **Exists** | Pages in `src/app/[locale]/`, translations in `messages/`, compliance log in `.redesign-state/compliance-log.md` |
 | 7 | Review Cycles | Agents (looped, in separate terminals, + final pass) | **Exists** | Findings in `.redesign-state/review-findings.md`, fixes applied |
-| 8 | Content Audit | Orchestrator + `web-designer` for drafting | **Exists** | `[NEEDS:]` summary |
+| 8 | Content Audit | Orchestrator + `web-designer` for drafting | **Exists** | `NEEDS_FROM_CLIENT.md` (committed) |
 | 9 | SEO Validation | Orchestrator (reads `seo-patterns/SKILL.md`) | **Exists** | Fixed meta, schema, links, sitemap |
 | 10 | Production Readiness | Orchestrator | **Exists** | All checks pass |
 | 11 | Publish | Command (`/publish`) | **Exists** | Live site on Vercel |
+| 12 | Sales Brief + Wrap-Up | Orchestrator (inline; follows `/sales-brief` procedure) | **Exists** | `SALES_BRIEF.md` (gitignored), refreshed `NEEDS_FROM_CLIENT.md`, consolidated final report |
 
 **Step ordering rationale:** Content Strategy (2) runs before Site Planning (3) because messaging gaps inform which pages are justified. Redirect Mapping (4) runs after Site Planning (3) because you need the new URL structure before you can map old URLs to it.
 
@@ -372,7 +373,7 @@ The web-designer loads many documents. To avoid overwhelming its context window,
 - Homepage
 - Services hub
 - Individual service pages
-- Contact page (with working form + Server Action)
+- Contact page — see `contact-form/SKILL.md`. The kit pre-ships the Server Action, schema, and BotID wiring under `src/lib/contact/`; the web-designer builds `src/app/[locale]/contact/page.tsx` + `src/components/ContactForm.tsx` using the template in `contact-form/references/contact-form-template.md`. **Do not modify the pre-shipped action files** — they are the locked contract.
 
 **Phase 2 — Trust & Evidence**
 - Case studies (listing + individual)
@@ -426,7 +427,7 @@ After each phase completes, the orchestrator tells the user what was built (one 
 |-------|---------|-------|-------|
 | `browser-qa` (red) | `/review-browser` | Rendered behavior in a real browser (nav, forms, language switcher, responsive), rendered fidelity to `design-direction.md` (fonts actually loaded, accent color as accent vs field, committed P-strategy visible), visual-gap identification with disposition continuity | Read, Grep, Glob, Bash, Chrome MCP |
 
-`browser-qa` is **phase-gated**, not time-looped. Invoke it after Phase 0 shell completion, after each completed Phase 1 core page, at the end of each build phase, and during the final review pass. Running it on a `/loop` cadence would catch half-built UI and HMR churn — noise that damages the signal. It requires a running local dev server (`npm run dev` on `localhost:3000`); if the server is not up, the command reports and exits.
+`browser-qa` is **phase-gated**, not time-looped. Invoke it after Phase 0 shell completion, after each completed Phase 1 core page, at the end of each build phase, and during the final review pass. Running it on a `/loop` cadence would catch half-built UI and HMR churn — noise that damages the signal. It requires a running local dev server on `localhost:3000`. **In the `/redesign` flow, the orchestrator owns the dev server lifecycle**: it starts `npm run dev` in the background at the first phase boundary and leaves it running through Step 12 (the standalone `/review-browser` command intentionally does NOT start the server — only the orchestrator does, because only the orchestrator owns a clean lifecycle window).
 
 **Design Distinctiveness is blocking.** The architect's first review dimension checks whether built pages execute `design-direction.md` (selected strategies, attribute→visual translation, Avoid list, identity test) or have drifted toward generic AI defaults. Violations are Critical severity, not Warning — "looks generic" blocks progress on this pipeline. This rubric exists because consistency alone doesn't catch blandness (a site can be consistently generic); distinctiveness catches that specific failure mode.
 
@@ -442,7 +443,7 @@ The orchestrator runs all review agents one final time on the completed site:
 1. Architect: full-site coherence review
 2. Customer-perspective: buyer evaluation of major pages (Homepage, Services, Contact)
 3. Accessibility auditor: comprehensive a11y pass
-4. Browser-qa: rendered behavior + rendered fidelity + visual-gap pass (only if `localhost:3000` is up; otherwise the orchestrator logs "browser-qa skipped — dev server not running" to `.redesign-state/decisions.md` and tells the user to run `/review-browser` manually before `/publish`).
+4. Browser-qa: rendered behavior + rendered fidelity + visual-gap pass. The orchestrator ensures the dev server is up (started during Step 6 phase boundaries; if the run resumes mid-flight without a server, the orchestrator starts one in the background and polls). If startup fails (port collision, build error), the orchestrator logs "browser-qa skipped — dev server failed to start: <reason>" to `.redesign-state/decisions.md` and surfaces a YELLOW gap; it does not halt the pipeline.
 
 Apply critical fixes surfaced by reviewers.
 
@@ -452,18 +453,19 @@ Apply critical fixes surfaced by reviewers.
 
 ### Step 8 — Content Audit
 
-**What:** Find all `[NEEDS:]` placeholder markers. Draft what can be drafted, report what needs client input.
+**What:** Find all `[NEEDS:]` placeholder markers. Draft what can be drafted, write a structured client-input deliverable for what remains.
 **Who:** Orchestrator finds markers; `web-designer` agent drafts replacements (content drafting requires the same brand knowledge and writing skill as page building — this is not simple orchestrator inline logic).
 
 #### Process
-1. `grep -rn "NEEDS:" src/ messages/ SITE_PLAN_TEMPLATE.md`
+1. `grep -rn "NEEDS:" src/ messages/ public/images/IMAGE_REQUESTS.md SITE_PLAN_TEMPLATE.md`
 2. Categorize markers: draftable from brand context vs. genuinely needs client input
 3. For draftable markers: spawn web-designer agent to draft replacement text using brand skill and page-content skill
-4. Compile remaining markers into a categorized list for the user
+4. Re-grep, then write `NEEDS_FROM_CLIENT.md` at the project root: a structured handoff grouped by page (homepage, about, each service, etc.) and by type (copy, factual data, imagery). Each item has file path + line number, marker text verbatim, and a one-line note on what the client should provide. The file is committed and ships with the repo so the client receives a single self-contained deliverable.
 
 #### Output
-- Reduced `[NEEDS:]` count
-- Client content request list, categorized by page and urgency
+- Reduced `[NEEDS:]` count in source
+- `NEEDS_FROM_CLIENT.md` (committed) — single client-facing handoff document
+- Step 12 refreshes this file at run end; in between, fixes from Steps 7/9/10 may add/remove markers
 
 ---
 
@@ -496,7 +498,7 @@ Apply critical fixes surfaced by reviewers.
 **Who:** Orchestrator (inline checks).
 
 #### Functionality
-- [ ] Contact form submits (has Server Action or API route, success/error states)
+- [ ] Contact form: `ContactForm.tsx` imports `submitContactForm` from `@/lib/contact/submit-contact-form`; honeypot field `name="website"` rendered visually-hidden via off-screen positioning (NOT `display:none`); `RESEND_API_KEY` and `CONTACT_FROM_EMAIL` set in Vercel env; `CONTACT_SITE_NAME` set; `CONTACT_FROM_NAME` set (optional — falls back to site name if unset); `CONTACT_RECIPIENT_EMAIL` set OR a `[NEEDS:client to provide contact form recipient email]` marker exists; all four error codes (`validation_failed`, `bot_detected`, `send_failed`, `config_missing`) have translations in every configured locale.
 - [ ] Cookie consent enforces preferences (analytics blocked until consent)
 - [ ] All forms fire submission tracking events
 
@@ -550,6 +552,30 @@ Once all checks pass (fixing issues as they're found), proceed directly to Step 
 
 ---
 
+### Step 12 — Sales Brief + Wrap-Up
+
+**What:** Generate the salesperson-facing brief, refresh the client-input deliverable, and print a single consolidated final report. This step makes the pipeline's deliverables visible without forcing the user to re-read the run log.
+**Who:** Orchestrator (inline; follows the procedure in `.claude/commands/sales-brief.md` — it is a synthesis task done in the current context, not delegated to an agent).
+
+#### Process
+1. **Generate the sales brief** — follow `.claude/commands/sales-brief.md`. Prerequisites are guaranteed by Steps 1, 2, and 5.1 having already run. Output: `SALES_BRIEF.md` (gitignored, private).
+2. **Refresh `NEEDS_FROM_CLIENT.md`** — re-run the grep used in Step 8; if the count or content has changed since Step 8 wrote the file, rewrite it with the current state. (Steps 7/9/10 fixes may have added or removed markers.)
+3. **Print the consolidated report** — what was built, gate verdict, deploy status, NEEDS file pointer + summary, sales brief pointer + one-sentence pitch, dev server status. See the `/redesign` Step 12.3 template for the exact shape.
+
+#### Outputs
+- `SALES_BRIEF.md` at project root (gitignored)
+- Refreshed `NEEDS_FROM_CLIENT.md` (committed)
+- Final user-facing report
+
+#### Why this is a separate step
+The pipeline previously ended at publish. Two failure modes drove adding Step 12:
+1. **Sales brief was an opt-in afterthought** — useful kit users had to remember to run `/sales-brief` separately. Folding it into the run guarantees the artifact exists when the project ships.
+2. **Client-input visibility decayed across run** — Step 8 wrote a categorized list once, but mid-pipeline fixes drifted it out of sync. Refreshing it at the end gives the client an accurate handoff.
+
+If the user runs `/sales-brief` standalone (outside `/redesign`), it still works — Step 12 is just where the orchestrator guarantees it gets generated.
+
+---
+
 ## Skills Inventory
 
 ### Existing Skills
@@ -569,6 +595,7 @@ Once all checks pass (fixing issues as they're found), proceed directly to Step 
 | `analytics-tracking` | Event tracking patterns, cookie consent integration, Search Console continuity | `web-designer`, Production Readiness (Step 10) | Step 6 (during build) + Step 10 (validation) |
 | `legal-compliance` | Cookie consent implementation, GDPR form handling, privacy policy requirements, accessibility statements | `web-designer` | Step 6 Phase 3 (legal pages) |
 | `media-prompting` | Image-generation prompt patterns — row schema for `IMAGE_REQUESTS.md`, P-strategy → prompt language mapping (P1–P8), aspect/focal conventions per role, negative-prompt patterns to suppress AI stock-photo sheen | `web-designer`, `/generate-media-prompts` | Step 6 (during build) |
+| `contact-form` | Contact-form contract: pre-shipped Server Action under `src/lib/contact/`, BotID + honeypot, env-var schema (RESEND_API_KEY, CONTACT_FROM_EMAIL, CONTACT_RECIPIENT_EMAIL, CONTACT_SITE_NAME, CONTACT_FROM_NAME), error-code shape for i18n, required translation keys, and the form template the web-designer adapts to design tokens. References include the agency-setup runbook (read once by the kit owner). | `web-designer` (Step 6 Phase 1 — Contact page), `architect` (Step 7), `legal-compliance` (cross-reference) | Step 6 Phase 1 |
 
 **Imagery artifacts overview (not skills, but work together):**
 - **`IMAGE_SLOTS.md`** at project root — **authoritative inventory of every required image slot**, derived from the committed direction brief + site plan at end of Step 5.2. Each slot has a Resolution (pending / catalog-reuse / manifest-row / image-present / justified-none). This is the binding list the architect, web-designer Phase 3 self-check, and `/generate-media-prompts` all audit against. Closes the "missing image with no marker, no row" failure mode that the first saxen run hit.
@@ -603,7 +630,8 @@ Once all checks pass (fixing issues as they're found), proceed directly to Step 
 | `/review-architect` | Run architect review (designed for `/loop`) | **Exists** |
 | `/review-customer` | Run customer-perspective review (designed for `/loop`) | **Exists** |
 | `/review-a11y` | Run accessibility audit (designed for `/loop`) | **Exists** |
-| `/review-browser` | Run browser QA against the running local dev server (phase-gated; do NOT use with `/loop`) | **Exists** |
+| `/review-browser` | Run browser QA against the running local dev server (phase-gated; do NOT use with `/loop`). Standalone command does NOT start the dev server — only `/redesign` does. | **Exists** |
+| `/sales-brief` | Generate the per-company outreach brief. Standalone; also invoked inline by `/redesign` Step 12. | **Exists** |
 | `/generate-media-prompts` | Reconcile `[NEEDS:image …]` markers with `IMAGE_REQUESTS.md`; verify convergence | **Exists** |
 | `/add-dos-and-donts` | Append a new rule to `.claude-plugin/GUIDELINES.md` | **Exists** |
 
@@ -782,6 +810,9 @@ project-root/
 ├── redirects.md                       ← Old→new URL mapping (Step 4)
 ├── design-direction.md                ← Written by design-system skill (Step 5.1) — the committed visual language
 ├── IMAGE_SLOTS.md                     ← Brief-derived inventory of required image slots (end of Step 5.2)
+├── NEEDS_FROM_CLIENT.md               ← Structured client-input handoff (Step 8 writes, Step 12 refreshes; committed)
+├── SALES_BRIEF.md                     ← Salesperson-facing brief (Step 12 writes; gitignored, private)
+├── .env.example                       ← Documents required env vars (contact form, etc.); setup-website.sh writes real values to .env.local
 │
 ├── .claude/commands/
 │   ├── redesign.md                    ← Pipeline orchestrator
@@ -790,6 +821,7 @@ project-root/
 │   ├── review-customer.md             ← Customer review (for /loop)
 │   ├── review-a11y.md                 ← A11y review (for /loop)
 │   ├── review-browser.md              ← Browser QA (phase-gated, NOT /loop)
+│   ├── sales-brief.md                 ← Sales brief generation (standalone + Step 12)
 │   ├── generate-media-prompts.md      ← Reconcile image markers ↔ manifest
 │   └── add-dos-and-donts.md           ← Append to GUIDELINES.md
 │
@@ -838,8 +870,13 @@ project-root/
 │       │   └── SKILL.md
 │       ├── legal-compliance/
 │       │   └── SKILL.md
-│       └── media-prompting/
-│           └── SKILL.md               ← Image-generation prompt patterns
+│       ├── media-prompting/
+│       │   └── SKILL.md               ← Image-generation prompt patterns
+│       └── contact-form/
+│           ├── SKILL.md               ← Contact-form contract for the web-designer
+│           └── references/
+│               ├── contact-form-template.md  ← Template for ContactForm.tsx + page.tsx
+│               └── agency-setup.md           ← One-time agency setup (read once by kit owner)
 │
 ├── public/images/
 │   ├── IMAGE_CATALOG.md               ← Written by Step 1 (reusable existing images)
@@ -861,5 +898,13 @@ project-root/
 │
 ├── src/app/[locale]/                  ← Built pages
 ├── src/components/                    ← Shared components
+├── src/instrumentation-client.ts      ← BotID client-side registration (pre-shipped)
+├── src/lib/contact/                   ← Pre-shipped contact-form infrastructure (do not modify)
+│   ├── contact-schema.ts              ← Zod schema
+│   ├── send-contact-email.ts          ← Resend wrapper
+│   └── submit-contact-form.ts         ← 'use server' action
 └── messages/{locale}.json             ← Translations
+
+External (machine-local, not in repo):
+└── ~/.config/website-redesign-kit/agency.env   ← One-time agency creds (RESEND_API_KEY, CONTACT_FROM_EMAIL); sourced by setup-website.sh
 ```

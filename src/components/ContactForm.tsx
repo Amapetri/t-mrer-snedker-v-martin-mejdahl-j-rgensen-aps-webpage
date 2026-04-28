@@ -11,13 +11,31 @@
 // ─────────────────────────────────────────────
 
 import { useState, useTransition, useId, useRef } from "react";
-import { submitContactForm, type ContactFormData } from "@/app/actions/contact";
+import { submitContactForm } from "@/lib/contact/submit-contact-form";
+
+type ContactFormData = {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+};
 
 type FormState =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "success" }
   | { status: "error"; message: string };
+
+// Maps the kit action's structured error codes to the localized fallback
+// shown above the submit button. Per-field validation errors are still
+// surfaced inline below their input.
+const ERROR_MESSAGES: Record<string, string> = {
+  validation_failed: "Tjek venligst de markerede felter og prøv igen.",
+  bot_detected: "Vi kunne ikke verificere din indsendelse. Genindlæs siden og prøv igen.",
+  send_failed: "Beskeden kunne ikke sendes. Ring til os på 40 36 88 62 eller skriv til martin@mejdahltoemrer.dk.",
+  config_missing: "Formularen er under opsætning. Skriv direkte til martin@mejdahltoemrer.dk.",
+};
 
 const SUBJECT_OPTIONS = [
   "Tagrenovering",
@@ -155,10 +173,11 @@ export function ContactForm() {
       phone: (raw.get("phone") as string) ?? "",
       subject: (raw.get("subject") as string) ?? "",
       message: (raw.get("message") as string) ?? "",
-      bot_field: (raw.get("bot_field") as string) ?? "",
     };
 
-    // Client-side validation first
+    // Client-side validation first — stricter than the kit's Zod schema
+    // (subject required from dropdown, message ≥20 chars). Server still
+    // re-validates via Zod regardless.
     const clientErrors = validateFields(data);
     if (Object.keys(clientErrors).length > 0) {
       setFieldErrors(clientErrors);
@@ -169,12 +188,22 @@ export function ContactForm() {
     setFormState({ status: "loading" });
 
     startTransition(async () => {
-      const result = await submitContactForm(data);
-      if (result.success) {
+      const result = await submitContactForm({ status: "idle" }, raw);
+      if (result.status === "success") {
         setFormState({ status: "success" });
         formRef.current?.reset();
-      } else {
-        setFormState({ status: "error", message: result.error });
+      } else if (result.status === "error") {
+        // Map kit error codes to a top-line message + (for validation_failed)
+        // server-side per-field errors that didn't trip client-side validation.
+        const message = ERROR_MESSAGES[result.code] ?? ERROR_MESSAGES.send_failed;
+        setFormState({ status: "error", message });
+        if (result.code === "validation_failed" && result.fieldErrors) {
+          const errs: Partial<Record<string, string>> = {};
+          if (result.fieldErrors.name) errs.name = "Angiv dit navn.";
+          if (result.fieldErrors.email) errs.email = "Angiv en gyldig e-mailadresse.";
+          if (result.fieldErrors.message) errs.message = "Beskriv dit projekt.";
+          setFieldErrors(errs);
+        }
       }
     });
   }
@@ -250,10 +279,13 @@ export function ContactForm() {
           overflow: "hidden",
         }}
       >
-        <label htmlFor="bot_field_input">Lad dette felt stå tomt</label>
+        {/* Field name "website" matches the kit action's honeypot check.
+            Label kept English on purpose — bots are language-agnostic and
+            screen readers ignore aria-hidden parents anyway. */}
+        <label htmlFor="bot_field_input">Website (leave blank)</label>
         <input
           id="bot_field_input"
-          name="bot_field"
+          name="website"
           type="text"
           tabIndex={-1}
           autoComplete="off"

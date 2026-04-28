@@ -74,6 +74,17 @@ Every privacy policy must cover:
 - Should use **plain language** — legal jargon is discouraged by GDPR
 - Update date should be visible
 
+### Standard sub-processors (this kit's stack)
+
+The privacy policy must list every third-party that processes personal data on the company's behalf. The kit's default stack uses these sub-processors. List them explicitly — omitting one is a GDPR Article 13 violation.
+
+| Sub-processor | Purpose | Personal data handled | Region | Transfer mechanism | Retention |
+|---|---|---|---|---|---|
+| Vercel, Inc. | Hosting + (cookie-gated) Analytics | IP address, request metadata, user agent | US | Standard Contractual Clauses | Per Vercel's standard |
+| Resend, Inc. | Contact form email delivery | Visitor name, email, phone (optional), subject, message | US | Standard Contractual Clauses | 30 days in Resend's logs; permanent in the company's email inbox until deleted |
+
+Add additional sub-processors as the site adopts them (CMS, CRM, chat widgets, map embeds, font CDNs that log IP). The legal basis for contact form processing is **legitimate interest** (responding to inquiries) and **contract preparation** (where the inquiry leads to a service relationship); it does not require consent. See `contact-form/SKILL.md` for the data-flow specifics.
+
 ## Cookie Policy
 
 ### Required Content

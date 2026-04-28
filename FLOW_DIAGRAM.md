@@ -44,21 +44,23 @@ flowchart TD
     BV3 --> S7
 
     subgraph VALIDATE["VALIDATE"]
-        S7["Step 7: Final Review<br/><b>architect</b> + <b>customer-perspective</b><br/>+ <b>accessibility-auditor</b><br/>Apply critical fixes"]
+        S7["Step 7: Final Review<br/><b>architect</b> + <b>customer-perspective</b><br/>+ <b>accessibility-auditor</b> + <b>browser-qa</b><br/>(orchestrator manages dev server)<br/>Apply critical fixes"]
         S7 --> S8
 
-        S8["Step 8: Content Audit<br/>Grep [NEEDS:] markers<br/><b>web-designer</b> drafts replacements<br/>Report remaining gaps"]
+        S8["Step 8: Content Audit<br/>Grep [NEEDS:] markers<br/><b>web-designer</b> drafts replacements<br/>Write NEEDS_FROM_CLIENT.md"]
         S8 --> S9
 
         S9["Step 9: SEO Validation<br/><b>seo-patterns skill</b> as checklist<br/>Meta, schema, headings, links<br/>Sitemap, redirects, canonicals"]
         S9 --> S10
 
-        S10["Step 10: Production Readiness<br/>Forms, consent, security, a11y<br/>Performance, analytics, legal<br/>Redirects verified"]
+        S10["Step 10: Production Readiness<br/>Forms, consent, security, a11y<br/>Performance, analytics, legal<br/>Write publish-gate.md"]
     end
 
-    S10 --> S11["Step 11: Publish<br/><b>/publish command</b><br/>npm run build → commit → push<br/>Vercel deploys automatically"]
+    S10 --> S11["Step 11: Publish<br/><b>/publish command</b><br/>Reads gate → build → commit → push<br/>Vercel deploys automatically"]
 
-    S11 --> Done(["Live"])
+    S11 --> S12["Step 12: Sales Brief + Wrap-Up<br/>Inline (follows /sales-brief procedure)<br/>Refresh NEEDS_FROM_CLIENT.md<br/>Write SALES_BRIEF.md<br/>Print consolidated final report"]
+
+    S12 --> Done(["Live + handoff"])
 ```
 
 ## Review Loop Architecture (parallel with Build)
@@ -81,9 +83,14 @@ flowchart LR
         X["/loop 15m /review-a11y<br/><b>accessibility-auditor agent</b><br/>WCAG 2.1 AA<br/>Keyboard nav<br/>Contrast, ARIA"]
     end
 
+    subgraph PG["Phase-gated (no /loop)"]
+        B["<b>browser-qa agent</b><br/>Orchestrator runs at phase boundaries<br/>+ Step 7 final review<br/>(orchestrator starts dev server)"]
+    end
+
     A -.->|issues| R
     C -.->|issues| R
     X -.->|issues| R
+    B -.->|issues| R
 ```
 
 ## Skill & Agent Read Map

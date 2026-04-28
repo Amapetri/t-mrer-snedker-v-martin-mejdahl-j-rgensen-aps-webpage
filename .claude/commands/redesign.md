@@ -33,6 +33,8 @@ Read these files and determine the current state. Apply the **completeness rules
     - **Pending/deferred blockers.** Any finding with `status: pending` AND `blocking: yes`, or `status: deferred` AND `blocking: yes`, or `status: deferred` AND `publish-allowed: no` or missing, or `status: rejected` AND `blocking: yes` without a substantive `reason` — Step 7 drain must handle before Step 11.
 12. **Compliance log.** `.redesign-state/compliance-log.md` — is the most recently built page blocked on an unjustified FAIL?
 13. **Placeholders.** `grep -rn "NEEDS:" src/ messages/` — count remaining.
+14. **Client-input deliverable.** `NEEDS_FROM_CLIENT.md` exists at project root AND its `[NEEDS:]` count matches the current grep count. Mismatch (or missing file) = re-write in Step 8 / Step 12.2.
+15. **Sales brief.** `SALES_BRIEF.md` exists at project root. Missing = generate in Step 12.1. (The brief is gitignored; it will not be present on a fresh clone — that's expected.)
 
 Report: "Steps 1-N are done. Stale lanes: <list>. Blocking findings: <count>. Starting from step <X>."
 
@@ -42,6 +44,7 @@ Report: "Steps 1-N are done. Stale lanes: <list>. Blocking findings: <count>. St
 - If 1–9 are done but built pages exist with unresolved issues, re-enter Step 6 rework cycle.
 - If the site is built-through-Step-6 and has stale review lanes OR pending blocking findings, **re-enter Step 7** — do NOT jump to Step 10 or Step 11.
 - Step 10 is **mandatory** before Step 11. Never skip it on resumption, regardless of whether a prior Step 10 pass exists. This is what closes the class of failures where new audits were added to the kit but an old project's Step 10 pass was considered valid. The Step 10 block writes `.redesign-state/publish-gate.md` which `/publish` reads as its gate.
+- Step 12 is **mandatory** before declaring the run complete — it writes `SALES_BRIEF.md` and refreshes `NEEDS_FROM_CLIENT.md`. If you arrived via resumption and Step 11 has already published but Step 12 hasn't run (no `SALES_BRIEF.md` or stale `NEEDS_FROM_CLIENT.md`), jump straight to Step 12 — do not re-publish.
 
 Append a one-line entry to `.redesign-state/decisions.md` recording what you resumed from and why, then proceed immediately.
 
@@ -149,7 +152,7 @@ Tell the user:
 > "Building pages now. You can optionally run review loops in separate terminals — they write findings to `.redesign-state/review-findings.md` which I drain between phases:
 > `/loop 15m /review-architect`, `/loop 15m /review-customer`, `/loop 15m /review-a11y`
 >
-> If you have `npm run dev` running on localhost:3000, I'll also run browser-qa at each phase boundary and in the final review — it's phase-gated, not `/loop`-based, because it attaches to completed work, not wall-clock ticks."
+> I'll manage a local dev server and run browser-qa myself at each phase boundary and in the final review — it's phase-gated (not `/loop`-based) because it attaches to completed work, not wall-clock ticks. The dev server stays up after the run; you can stop it manually when you're done."
 
 Build pages phase by phase. For EACH page or component, launch the **web-designer agent** (Agent tool) with a prompt that passes the **full direction brief context** — not just brand attributes. The prompt must include:
 
@@ -157,6 +160,7 @@ Build pages phase by phase. For EACH page or component, launch the **web-designe
 - Pointer to `design-direction.md` (binding — the whole brief, including the selected strategy string, attribute→visual table, Avoid list, identity test, and "What we're moving away from" list)
 - Pointer to `design-system/SKILL.md` for tokens
 - Pointer to the relevant `page-design` reference file (homepage-content.md for homepage, service-pages-content.md for service pages, etc. — selective loading, do not load all references)
+- For the **Contact page specifically**, also pass `contact-form/SKILL.md` (binding contract on the pre-shipped Server Action interface, env vars, error codes, translation keys, and required form structure)
 - Instruction: "Use `/frontend-design` for UI implementation, feeding it the direction brief (strategies + translation table + Avoid list + identity test), design tokens, and content requirements. After the page is built, append a compliance-log entry to `.redesign-state/compliance-log.md` per the schema in that file. Every strategy must get a PASS / FAIL / JUSTIFIED verdict with a quote."
 
 **Build order (per `SITE_PLAN_TEMPLATE.md` phases):**
@@ -177,7 +181,13 @@ Build pages phase by phase. For EACH page or component, launch the **web-designe
 
 1. Run `npm run build` to verify compilation. If it fails, fix it before continuing.
 
-2. **Phase-gated browser QA.** Check if a local dev server is up: `curl -sI http://localhost:3000 --max-time 5 | head -1`. If it returns `HTTP/... 200`, launch the **browser-qa agent** (Agent tool) with instructions: "Do a phase-boundary browser QA pass. Apply the readiness protocol per `.claude-plugin/agents/browser-qa.md`. Scope: full sampled route set at mobile 375 + desktop 1440, all configured locales for `/` and `/contact`. Verify rendered behavior, rendered fidelity to `design-direction.md`, and identify visual gaps (including hero sections with no image). Append findings to `.redesign-state/review-findings.md` with reviewer `browser-qa`; save screenshots to `.redesign-state/screenshots/` per the naming schema. Honor existing `gap-image` dispositions (don't re-raise `rejected` or `converted`)." If the dev server is NOT up, append one line to `.redesign-state/decisions.md`: "browser-qa skipped at <phase> boundary — dev server not running on localhost:3000" and continue. Do not stop to ask the user — they can run `/review-browser` manually later if they want that coverage.
+2. **Phase-gated browser QA.** Ensure a local dev server is up before invoking browser-qa — the orchestrator manages the server lifecycle in this flow (do NOT delegate this to the user). Procedure:
+
+   a. Probe: `curl -sI http://localhost:3000 --max-time 5 | head -1`. If it returns `HTTP/... 200`, the server is already running — proceed to step (c).
+   b. Otherwise, start it in the background using the Bash tool with `run_in_background: true`: `npm run dev`. Then poll the same curl every 2 seconds for up to 60 seconds. As soon as it returns 200, proceed. If it never returns 200 (port collision, build error, missing dependency), append one line to `.redesign-state/decisions.md`: "browser-qa skipped at <phase> boundary — dev server failed to start: <reason from BashOutput>" and continue with the next step (do NOT halt the pipeline; the gate will YELLOW-flag this later).
+   c. With the server confirmed up, launch the **browser-qa agent** (Agent tool) with instructions: "Do a phase-boundary browser QA pass. Apply the readiness protocol per `.claude-plugin/agents/browser-qa.md`. Scope: full sampled route set at mobile 375 + desktop 1440, all configured locales for `/` and `/contact`. Verify rendered behavior, rendered fidelity to `design-direction.md`, and identify visual gaps (including hero sections with no image). Append findings to `.redesign-state/review-findings.md` with reviewer `browser-qa`; save screenshots to `.redesign-state/screenshots/` per the naming schema. Honor existing `gap-image` dispositions (don't re-raise `rejected` or `converted`)."
+
+   The dev server is left running for subsequent phase boundaries and the Step 7 final review; it is NOT shut down between phases.
 
 3. **Drain** `.redesign-state/review-findings.md`:
    - For each unhandled finding (architect, customer-perspective, a11y, browser-qa), decide: apply now (critical+blocking), defer (note in the finding's status line), or reject (log reasoning in `.redesign-state/decisions.md`).
@@ -200,7 +210,7 @@ Drain any remaining findings in `.redesign-state/review-findings.md` first, then
 
 3. Launch the **accessibility-auditor agent** (Agent tool): "Run a comprehensive WCAG 2.1 AA accessibility audit across all built pages. Check semantic HTML, contrast, keyboard navigation, ARIA, forms, focus management, motion preferences. Tag each finding as [AUTO-FIX] (mechanical, single-file) or [NEEDS DESIGNER]."
 
-4. If `curl -sI http://localhost:3000 --max-time 5 | head -1` returns `HTTP/... 200`, launch the **browser-qa agent** (Agent tool): "Final browser QA pass across the full sampled route set. Mobile + desktop, all configured locales for `/` and `/contact`. Apply the readiness protocol per `.claude-plugin/agents/browser-qa.md`. Verify rendered behavior, rendered fidelity to `design-direction.md` (fonts actually loaded at display weights, accent color behaves as accent not field, committed P-strategy visible in the rendered output), and identify any remaining visual gaps. Append findings to `.redesign-state/review-findings.md`." If the dev server is not running, append one line to `.redesign-state/decisions.md`: "browser-qa skipped in final review — dev server not running on localhost:3000; recommend the user runs `/review-browser` manually before `/publish`." Include this gap in the status summary to the user.
+4. **Browser-qa final pass.** Ensure the dev server is up (the orchestrator should already have started it during Step 6; if not, start it now using the same procedure as the Step 6 phase-boundary block — background `npm run dev` + 60s poll). Once it's up, launch the **browser-qa agent** (Agent tool): "Final browser QA pass across the full sampled route set. Mobile + desktop, all configured locales for `/` and `/contact`. Apply the readiness protocol per `.claude-plugin/agents/browser-qa.md`. Verify rendered behavior, rendered fidelity to `design-direction.md` (fonts actually loaded at display weights, accent color behaves as accent not field, committed P-strategy visible in the rendered output), and identify any remaining visual gaps. Append findings to `.redesign-state/review-findings.md`." If the dev server fails to start, append one line to `.redesign-state/decisions.md`: "browser-qa skipped in final review — dev server failed to start: <reason>" and surface it as a YELLOW gap in the status summary. Do not halt the pipeline; fall back to the other reviewers' findings.
 
 Apply critical fixes the agents surface. Distinctiveness violations from the architect are Critical and blocking — spawn web-designer to rework. Apply `[AUTO-FIX]` findings from the a11y-auditor inline. Route `[NEEDS DESIGNER]` findings to web-designer. Route browser-qa findings per the severity rules in the phase-drain section above — critical rendered-behavior/rendered-fidelity are blocking; `gap-image` findings go to web-designer for disposition.
 
@@ -215,7 +225,44 @@ grep -rn "NEEDS:" src/ messages/ SITE_PLAN_TEMPLATE.md
 
 For markers that can be drafted from brand context, launch the **web-designer agent** to draft replacement text. For markers that genuinely need client input, keep them.
 
-Briefly report how many placeholders remain and what kind of content the client needs to provide.
+**Write the client-input deliverable.** After drafting, re-run the grep across `src/`, `messages/`, `public/images/IMAGE_REQUESTS.md`, and `SITE_PLAN_TEMPLATE.md`, then write a structured summary to `NEEDS_FROM_CLIENT.md` at the project root. Format:
+
+```markdown
+# Content Still Needed From Client
+
+> One-paragraph header (rewrite for this project): explain that every item below is a `[NEEDS:]` marker the build couldn't fill from extracted brand context. The site is live with placeholders rendered with a dashed amber border (`.placeholder-content` class) so they're visible. The client should reply per item; the agency will swap the marker for real content and republish via `/publish`.
+
+## Summary
+- **Total markers:** <N>
+- **By type:** <copy: N> · <factual data: N> · <imagery: N> · <other: N>
+- **By page:** <homepage: N>, <about: N>, <services hub: N>, <each service: N>, <case studies: N>, <contact: N>, <legal: N>
+
+## Items by page
+
+### Homepage
+- `messages/en.json:42` — `[NEEDS: Founding-year quote for hero stats band]` — single sentence the client can supply.
+- `src/app/[locale]/page.tsx:118` — `[NEEDS: ...]` — ...
+
+### About
+- ...
+
+### Services — <service name>
+- ...
+
+(Continue for every page that has markers. Group `messages/<locale>.json` markers under the page they appear on, not under "translations".)
+
+## Imagery
+- `IMG-IMG-hero-01` (`public/images/IMAGE_REQUESTS.md`) — short description of what the client can supply if they have it, vs. what we'll generate if not. Include the slot ID so the client and agency can match it back.
+- ...
+
+## Notes for the client
+- The dashed amber outlines on the live site mark exactly where these gaps are — clicking through pages is the fastest tour.
+- Anything left blank past <date the agency commits to> will be filled with generated/AI-sourced content per the agency's house policy.
+```
+
+Each item is one bullet: file path + line number, the marker text verbatim, and a one-line note explaining what the client should provide. Group by page (route) so the client can review one page at a time. The file is committed to the repo so it travels with the project.
+
+Briefly report to the user: total remaining count, the file that was written, and the top 3 categories of input still needed.
 
 ---
 
@@ -245,7 +292,7 @@ Verify every item systematically. Read these skill files for reference:
 - `.claude-plugin/skills/legal-compliance/SKILL.md`
 
 ### Functionality
-1. **Contact form submits** — has Server Action, success/error states
+1. **Contact form** — `ContactForm.tsx` imports `submitContactForm` from `@/lib/contact/submit-contact-form` (do not allow forks of the pre-shipped action); honeypot field `name="website"` rendered visually-hidden via off-screen positioning (NOT `display:none`); `RESEND_API_KEY` + `CONTACT_FROM_EMAIL` + `CONTACT_SITE_NAME` set in Vercel env; `CONTACT_FROM_NAME` set in Vercel env (optional — falls back to site name if unset); `CONTACT_RECIPIENT_EMAIL` either set OR a `[NEEDS:client to provide contact form recipient email]` marker exists; all four error codes (`validation_failed`, `bot_detected`, `send_failed`, `config_missing`) translated in every configured locale. See `contact-form/SKILL.md` for the full contract.
 2. **Cookie consent enforces** — analytics blocked until consent given
 3. **Event tracking** — form submissions and CTA clicks fire tracking events
 
@@ -276,7 +323,7 @@ Fix issues as you find them.
 **After the checklist is worked through, write the publish gate.** The publish gate is a single file `.redesign-state/publish-gate.md` that encodes whether the project is safe to ship. `/publish` refuses to run if the gate is missing, stale, or FAIL. Write this EVERY time Step 10 runs — even if you resumed mid-flight, this file must be fresh at the end of Step 10. Evaluate these checks and write PASS or FAIL for each:
 
 1. **Build green** — `npm run build` succeeds.
-2. **Review lanes fresh** — every lane (`architect`, `customer`, `a11y`, `browser-qa`) has a run-log entry in `.redesign-state/review-findings.md` with `plugin=<current version>` (read current from `.claude-plugin/plugin.json`). No lane is stale. If `browser-qa` is stale because the dev server isn't running, flag the lane as `skipped-with-reason: dev-server-not-running` — that counts as a yellow-flag in the gate but does not block by itself.
+2. **Review lanes fresh** — every lane (`architect`, `customer`, `a11y`, `browser-qa`) has a run-log entry in `.redesign-state/review-findings.md` with `plugin=<current version>` (read current from `.claude-plugin/plugin.json`). No lane is stale. If `browser-qa` was skipped because the orchestrator's dev-server-start attempt failed (port collision, build error, missing dependency), flag the lane as `skipped-with-reason: dev-server-failed-to-start` — that counts as a yellow-flag in the gate but does not block by itself. (`/redesign` now manages the dev server itself, so this YELLOW state is rare — it usually indicates an environment issue worth investigating.)
 3. **No pending blockers** — no finding in `review-findings.md` has `status: pending` AND `blocking: yes`.
 4. **No deferred blockers** — no finding has `status: deferred` AND `blocking: yes`. A blocking finding cannot be deferred-to-publish.
 5. **Deferrals are publish-allowed** — every `status: deferred` finding has `publish-allowed: yes` AND a `reason:` field filled with substantive content. Any missing or empty `publish-allowed` on a deferred finding = FAIL.
@@ -325,8 +372,68 @@ Write the gate file in this exact shape so `/publish` can parse it:
 2. If `Overall: FAIL`, stop. Report the blockers section to the user. Do NOT invoke `/publish`.
 3. If `Overall: PASS`, invoke `/publish`. The publish command will re-read the gate as a second layer of protection.
 
-Report to the user:
-- What was built (page count, component count)
-- Remaining `[NEEDS:]` placeholders that require client input
-- The gate verdict and what it checked
-- The site will be live within 1-2 minutes (on PASS) OR the exact blockers to resolve (on FAIL)
+After publish completes, proceed immediately to Step 12. Do not pause for confirmation.
+
+---
+
+## Step 12 — Sales Brief + Wrap-Up
+
+This step closes the run. It produces the salesperson-facing brief and the final consolidated handoff report so the user has a complete picture without re-reading the run log.
+
+### 12.1 — Generate the sales brief
+
+Follow the procedure in `.claude/commands/sales-brief.md` inline (do NOT spawn an agent — the sales-brief command is explicit that it's a synthesis task done in the current context). The pipeline has just produced every input it requires (`company-brand/SKILL.md`, `content-strategy.md`, `design-direction.md`, old-site screenshots), so all prerequisites are already met. Write the output to `SALES_BRIEF.md` at the project root (gitignored).
+
+If the publish step failed (gate FAIL), still generate the sales brief — it doesn't require publish to have succeeded, and the brief is more useful when the build artifacts exist than when they don't. Note in `.redesign-state/decisions.md` that the brief was generated despite a failed publish so the audit trail is clean.
+
+### 12.2 — Refresh the client-input deliverable
+
+Step 8 wrote `NEEDS_FROM_CLIENT.md` mid-pipeline. Between Step 8 and now, fixes from Steps 7/9/10 may have added or removed `[NEEDS:]` markers. Re-grep:
+
+```bash
+grep -rn "NEEDS:" src/ messages/ public/images/IMAGE_REQUESTS.md SITE_PLAN_TEMPLATE.md 2>/dev/null
+```
+
+If the count changed since `NEEDS_FROM_CLIENT.md` was written, re-write the file using the same structure as Step 8. If the count is identical and no marker text changed, leave it alone.
+
+### 12.3 — Final wrap-up report to the user
+
+Print a single consolidated summary in this exact shape:
+
+```
+✅ Redesign run complete.
+
+**Built**
+- <page-count> pages across <locale-count> locales
+- <component-count> shared components
+- Phases: 0 (shell) · 1 (core) · 2 (trust) · 3 (legal)
+
+**Publish**
+- Gate verdict: PASS | FAIL
+- Commit: <short-sha> (or "no publish — gate FAIL")
+- Live in 1–2 minutes at <DOMAIN from CLAUDE.md> (on PASS)
+
+**Client input still needed** — see `NEEDS_FROM_CLIENT.md`
+- <total-count> markers remaining
+- Top categories: <e.g. copy: 12 · imagery: 4 · factual data: 2>
+- Top pages by gap count: <homepage (5), about (3), services hub (2)>
+
+**Sales brief** — see `SALES_BRIEF.md` (gitignored, private)
+- One-sentence pitch: "<copy from the brief's first section>"
+
+**Run state**
+- Decisions log: `.redesign-state/decisions.md`
+- Findings: `.redesign-state/review-findings.md`
+- Publish gate: `.redesign-state/publish-gate.md`
+- Browser-qa screenshots: `.redesign-state/screenshots/` (if dev server was up)
+
+**Dev server**
+- Still running on http://localhost:3000 (started by this run). Stop it with the matching BashOutput process if you don't need it.
+
+**What's next**
+- Read `NEEDS_FROM_CLIENT.md` and send the relevant items to the client.
+- Tailor `SALES_BRIEF.md` before any outreach (it is verbatim extraction; a salesperson should personalize it).
+- When client input arrives, swap the markers and re-run `/publish`.
+```
+
+Tailor each bullet to actual values from the run — do not leave placeholders in the printed summary.

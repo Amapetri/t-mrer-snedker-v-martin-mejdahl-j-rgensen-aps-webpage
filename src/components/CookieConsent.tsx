@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, startTransition } from "react";
 import { useTranslations } from "next-intl";
 
 // ─────────────────────────────────────────────
@@ -47,12 +47,21 @@ function storePreferences(prefs: CookiePreferences) {
 
 export function CookieConsent() {
   const t = useTranslations("cookies");
-  const [visible, setVisible] = useState(() => !getStoredPreferences());
+  // Start with banner hidden to match SSR (server has no localStorage).
+  // useEffect reveals or hides based on stored preferences after hydration.
+  const [visible, setVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [preferences, setPreferences] = useState<CookiePreferences>(
-    () => getStoredPreferences() ?? defaultPreferences
-  );
+  const [preferences, setPreferences] = useState<CookiePreferences>(defaultPreferences);
   const acceptAllRef = useRef<HTMLButtonElement>(null);
+
+  // Hydrate consent state from localStorage after mount
+  useEffect(() => {
+    const stored = getStoredPreferences();
+    startTransition(() => {
+      setVisible(!stored);
+      if (stored) setPreferences(stored);
+    });
+  }, []);
 
   // a11y-009: auto-focus the primary action when the banner becomes visible
   useEffect(() => {

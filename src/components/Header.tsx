@@ -38,7 +38,7 @@ const SERVICES: ServiceItem[] = [
 // Logotype — Zilla Slab wordmark, no image
 // ─────────────────────────────────────────────
 
-function Logotype() {
+function Logotype({ light = false }: { light?: boolean }) {
   const t = useTranslations("header");
   return (
     <Link
@@ -50,7 +50,7 @@ function Logotype() {
         className="font-bold text-[1.1rem] tracking-tight"
         style={{
           fontFamily: "var(--font-display)",
-          color: "var(--color-ink)",
+          color: light ? "var(--color-bone)" : "var(--color-ink)",
           letterSpacing: "var(--letter-spacing-tight)",
           lineHeight: "var(--line-height-tight)",
           transition: `color var(--duration-fast) var(--easing-standard)`,
@@ -209,7 +209,7 @@ function MobileNav({
         className="flex items-center justify-between px-6 py-5"
         style={{ borderBottom: "1px solid rgba(245,240,232,0.12)" }}
       >
-        <Logotype />
+        <Logotype light />
         <button
           ref={closeButtonRef}
           onClick={onClose}

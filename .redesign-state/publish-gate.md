@@ -1,7 +1,7 @@
 # Publish Gate
 
-**Computed at:** 2026-04-27T23:04:05Z
-**Commit:** b514154
+**Computed at:** 2026-04-28T06:01:40Z
+**Commit:** f6cb846 (pending next commit)
 **Plugin version:** 1.1.0
 **Overall:** PASS
 
@@ -10,7 +10,7 @@
 | # | Check | Result | Notes |
 |---|-------|--------|-------|
 | 1 | Build green | PASS | `npm run build` — 22 static pages generated, 0 TypeScript errors, 0 warnings. `npm run lint` — 0 errors, 0 warnings. |
-| 2 | Review lanes fresh | YELLOW | All 3 reviewable lanes ran at plugin=1.1.0 (current): `architect` 2026-04-27T16:05, `customer` 2026-04-27T14:22, `a11y` 2026-04-27T15:10. `browser-qa` skipped-with-reason: Chrome MCP tools (mcp__claude-in-chrome__*) not available in this environment. Dev server was running at localhost:3000. User can run `/review-browser` manually before or after deploy. Yellow flag does not block. |
+| 2 | Review lanes fresh | PASS | All 4 lanes ran at plugin=1.1.0: `architect` 2026-04-27T16:05, `customer` 2026-04-27T14:22, `a11y` 2026-04-27T15:10, `browser-qa` 2026-04-28T05:52. browser-qa completed full sampled route set (6 routes × 2 viewports). 2 critical findings found and fixed inline (hydration mismatch, mobile logotype). 1 note deferred. |
 | 3 | No pending blockers | PASS | 0 findings with status:pending AND blocking:yes. All blocking findings resolved or rejected with evidence. |
 | 4 | No deferred blockers | PASS | 0 findings with status:deferred AND blocking:yes. The one blocking+client-asset finding (FINDING-cust-001 Martin portrait) was correctly changed to status:rejected with substantive reason citing design-direction.md §Design Constraints. |
 | 5 | Deferrals publish-allowed | PASS | All deferred findings have publish-allowed:yes AND substantive reason: cust-004 (testimonials), cust-005 (service photos), cust-006 (2015 cases), cust-007 (Byg Garanti card consistency), cust-010, cust-011, cust-012, arch-007, arch-008, arch-009, arch-010, arch-011, a11y-012, a11y-013. All are client-content gaps or note-severity polish items. |

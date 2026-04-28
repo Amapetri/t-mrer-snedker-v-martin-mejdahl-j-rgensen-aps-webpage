@@ -114,3 +114,15 @@ Append-only log of orchestrator decisions during the redesign pipeline. Each ent
 **Effect:** 4 new routes live: `/ydelser/`, `/ydelser/tagrenovering/`, `/ydelser/tilbygninger/`, `/ydelser/fugtskade-sanering/`. Breadcrumbs component gained `"use client"` directive (had event handlers without it — pre-existing bug exposed by first use of Breadcrumbs outside the homepage). IMAGE_SLOTS.md updated: SLOT-ydelser-hub-hero-001 → `justified-none` (typography-first layout per design-direction.md constraint); SLOT-tag-renovering-hero-001 → `catalog-reuse: hero-main.jpg`; SLOT-tilbygninger-hero-001 → `catalog-reuse: tilbygning-halgaard-1.jpg` (+2 additional tilbygning images); SLOT-fugtskade-ydelse-hero-001 → `catalog-reuse: koebenhavn-lejlighed-foer.jpg` + `koebenhavn-lejlighed-skimmel.jpg` + `koebenhavn-lejlighed-efter.jpg` in correct before/after pairing.
 **Decision: fugtskade hero uses dark surface** — only dark-background hero across all service pages. Justified: urgency register; the audience is a homeowner who has discovered mold (high anxiety); dark signals the seriousness of the problem without manufactured urgency language. Reviewed against M1 (no animation added to heighten urgency — stillness maintained). This is a C5 surface variation (--color-surface-dark), not a gradient or off-palette color.
 **Decision: tilbygninger hero REVERSED to 5fr/7fr (image left, text right)** — every other hero has text left. Intentional L2 variation: the tilbygning service is most credibly evidenced by seeing a structure going up; giving the image the wider column communicates that the visual evidence is the primary message. This is the only service hero where image is wider than text.
+
+### 2026-04-28T05:52 — browser-qa run — commit f6cb846 — scope: 6 routes × 2 viewports × 1 locale — findings: 1 critical / 1 warning / 1 note
+**Why:** First browser-qa pass (Chrome MCP tools now available). Full sampled route set since no prior screenshots existed.
+**Effect:** FINDING-bqa-001 (hydration mismatch — ConsentAwareAnalytics reads localStorage in useState initializer) is critical rendered-behavior. Applying fix inline immediately.
+
+### 2026-04-28T05:53 — Fixing FINDING-bqa-001 — ConsentAwareAnalytics hydration mismatch
+**Why:** localStorage cannot be read in useState lazy initializer (runs on both server and client). Must move to useEffect.
+**Effect:** Eliminates "N 1 Issue" React hydration error. Fix: useState(false) + useEffect for localStorage read.
+
+### 2026-04-28T05:54 — Fixing FINDING-bqa-002 — Mobile logotype invisible on dark overlay
+**Why:** Logotype component uses --color-ink for "Martin Mejdahl" text; mobile overlay background is also --color-ink.
+**Effect:** Primary wordmark becomes visible on mobile menu overlay.

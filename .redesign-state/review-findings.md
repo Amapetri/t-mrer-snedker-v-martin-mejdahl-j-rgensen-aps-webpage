@@ -22,6 +22,7 @@ Example:
 2026-04-27T14:22 — reviewer=customer — plugin=1.1.0 — scope=home,ydelser,kontakt — verdict=3 critical, 5 warning, 4 note
 2026-04-27T15:10 — reviewer=a11y — plugin=1.1.0 — scope=all — verdict=4 critical, 6 warning, 3 note
 2026-04-27T16:05 — reviewer=architect — plugin=1.1.0 — scope=all — verdict=3 critical, 5 warning, 4 note
+2026-04-28T05:52 — reviewer=browser-qa — plugin=1.1.0 — scope=home,kontakt,om-os,ydelser/tagrenovering,privatlivspolitik — verdict=1 critical, 1 warning, 1 note
 
 ---
 
@@ -675,3 +676,73 @@ When `/redesign` resumes on an existing project, it reads this file's Run log, c
 | `--color-accent` on `--color-paper` | **2.98:1** | **FAIL** | FINDING-a11y-003 |
 | `--color-accent` on `--color-surface-dark` | 5.65:1 | PASS | Amber on dark — compliant |
 | `--color-bone` on `--color-surface-dark` | 15.86:1 | PASS | Inverse text — excellent |
+
+---
+
+## Browser QA — 2026-04-28
+
+**Run:** 2026-04-28T05:52:12Z  
+**Commit:** f6cb846  
+**Scope:** Full sampled route set (first run — no prior SHA)  
+**Viewport:** desktop 1440×900, mobile 375×812  
+**Locale:** da  
+**Dev server:** localhost:3000 — HTTP 200 confirmed  
+**Service worker:** none detected  
+**Screenshots:** captured in session; browser-qa MCP tool does not write to local filesystem — screenshots visible in conversation only  
+
+### Routes reviewed
+| Route | Status | Notes |
+|-------|--------|-------|
+| /da (homepage) | PASS | Hero, trust strip, services grid, cases preview, footer all render correctly |
+| /da (mobile) | PASS with note | Responsive layout correct; mobile menu fully functional |
+| /da/kontakt (desktop) | PASS | Form, Server Action, success state all verified |
+| /da/om-os | PASS | Portrait placeholder first-class and visible |
+| /da/ydelser/tagrenovering | PASS | Hero + real photo, breadcrumbs, content |
+| /da/privatlivspolitik | PASS | Clean legal typography |
+
+---
+
+### FINDING-bqa-001
+
+- **reviewer:** browser-qa
+- **page:** all pages (layout-level)
+- **severity:** critical
+- **category:** rendered-behavior
+- **blocking:** yes
+- **status:** resolved
+- **resolution:** Fixed in ConsentAwareAnalytics.tsx (useState(false) + useEffect with startTransition) and CookieConsent.tsx (same pattern). Hydration error cleared — "N 1 Issue" indicator gone.
+- **fix-type:** [NEEDS DESIGNER]
+- **finding:** Hydration mismatch on every page load. React console error: "Hydration failed because the server rendered HTML didn't match the client." Tree diff shows `ConsentAwareAnalytics → Analytics2 → <Suspense>` on client vs `<div role="region" aria-label="Cookieindstillinger">` (CookieConsent) on server. The ConsentAwareAnalytics component reads `localStorage` in a lazy state initializer which runs on the client but not on server — causing the mismatch. The "N 1 Issue" Next.js dev indicator is this error on every page. In production this causes a hydration re-render flash and React re-mounting the cookie consent component.
+- **fix:** In `ConsentAwareAnalytics.tsx`, change the lazy `useState(() => readConsent())` initializer to `useState(false)` and add a `useEffect(() => { setHasConsent(readConsent()); }, [])` to read localStorage after hydration. This eliminates the SSR/client mismatch. Same pattern may apply to `CookieConsent.tsx` if it also reads localStorage before mount.
+
+---
+
+### FINDING-bqa-002
+
+- **reviewer:** browser-qa
+- **page:** mobile nav overlay (Header.tsx)
+- **severity:** warning
+- **category:** rendered-fidelity
+- **blocking:** no
+- **status:** resolved
+- **resolution:** Added light?: boolean prop to Logotype component. MobileNav now passes <Logotype light /> which renders "Martin Mejdahl" in --color-bone instead of --color-ink. Verified: wordmark visible in bone color on dark overlay.
+- **fix-type:** [AUTO-FIX]
+- **finding:** In the mobile full-screen navigation overlay (dark ink background), the "Martin Mejdahl" Zilla Slab wordmark renders invisible — ink text (`color: var(--color-ink)` = #1a1612) on an ink background (#1a1612). Only the "TØMRER & SNEDKER" subtitle is visible because it uses `color: var(--color-stone)`. The Logotype component does not support a dark-background variant, so the primary wordmark disappears on the mobile overlay.
+- **fix:** In `Header.tsx`, pass the dark background context to the Logotype when rendered inside MobileNav — either add a `variant="light"` prop (render "Martin Mejdahl" in `var(--color-bone)` instead of `var(--color-ink)`) or inline the mobile logotype separately with `color: "var(--color-bone)"`.
+
+---
+
+### FINDING-bqa-003
+
+- **reviewer:** browser-qa
+- **page:** /da/ydelser/tagrenovering and homepage hero
+- **severity:** note
+- **category:** rendered-fidelity
+- **blocking:** no
+- **status:** deferred
+- **publish-allowed:** yes
+- **reason:** Positive observation, no code action needed. hero-main.jpg shows Martin Mejdahl's face by branded van — partial portrait gap coverage. Formal About page portrait (IMG-om-os-portrait-001) remains Priority 1 post-launch deliverable.
+- **fix-type:** n/a — positive observation, no action required
+- **finding:** `hero-main.jpg` shows Martin Mejdahl smiling in front of his branded company van. This image appears on the homepage hero (right column) and as the tagrenovering service page hero. The customer review finding cust-001 (no Martin photo) is partially addressed by this image — while not a formal portrait on the About page, Martin's face IS visible in the site's primary hero. Recommend: update cust-001 notes to acknowledge this; the About page portrait placeholder remains Priority 1 for a formal headshot.
+- **fix:** No code fix required. Suggest noting in IMAGE_REQUESTS.md that hero-main.jpg serves as an interim face-of-the-business image. The formal About portrait (IMG-om-os-portrait-001) remains needed.
+

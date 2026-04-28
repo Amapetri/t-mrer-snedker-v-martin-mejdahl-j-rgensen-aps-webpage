@@ -15,7 +15,7 @@
 // This component replaces direct <Analytics /> usage in layout.
 // ─────────────────────────────────────────────
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { COOKIE_KEY } from "@/components/CookieConsent";
 
@@ -38,14 +38,17 @@ function readConsent(): boolean {
 }
 
 export function ConsentAwareAnalytics() {
-  // Lazy initializer reads consent once on mount (avoids calling setState in effect body)
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(() => readConsent());
+  // Start false so SSR and initial client render match (avoids hydration mismatch).
+  // useEffect reads localStorage after hydration to enable analytics if consent was given.
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
 
   useEffect(() => {
-    // Listen for consent updates (dispatched by the cookie management button
-    // or future CookieConsent updates that call dispatchEvent)
+    // Read persisted consent after hydration — startTransition avoids sync setState-in-effect
+    startTransition(() => setAnalyticsEnabled(readConsent()));
+
+    // Listen for consent updates dispatched by CookieConsent or OpenCookieSettingsButton
     function handleConsentUpdate() {
-      setAnalyticsEnabled(readConsent());
+      startTransition(() => setAnalyticsEnabled(readConsent()));
     }
 
     window.addEventListener("cookie-consent-updated", handleConsentUpdate);
